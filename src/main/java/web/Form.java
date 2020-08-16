@@ -7,5 +7,9 @@ public class Form {
 	public int id;
 	public String title;
 	
+	@ManyToOne
+	public User user;
+	
+	public int    getId()    { return id;    }
 	public String getTitle() { return title; }
 }

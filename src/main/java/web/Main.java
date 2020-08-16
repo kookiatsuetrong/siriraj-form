@@ -1,6 +1,9 @@
 package web;
 import java.util.*;
+import java.math.*;
+import java.security.*;
 import javax.persistence.*;
+import javax.servlet.http.*;
 import org.springframework.ui.*;
 import org.springframework.boot.*;
 import org.springframework.stereotype.*;
@@ -13,6 +16,7 @@ public class Main {
 		SpringApplication.run(Main.class, z);
 	}
 }
+
 @Controller
 class Web {
 	@GetMapping("/")
@@ -20,26 +24,121 @@ class Web {
 		return "home";
 	}
 	
-	@GetMapping("/test")
-	String saveProduct(Model model) {
-		int fid = 1;
-		EntityManagerFactory factory = Persistence.createEntityManagerFactory("main");
-		EntityManager manager = factory.createEntityManager();
+	@GetMapping("/error")
+	String showError() {
+		return "error";	
+	}
+	
+	@GetMapping("/form/{id}")
+	String saveProduct(Model model, @PathVariable String id) {
+		int fid = -1;
+		try {
+			fid = Integer.valueOf(id);
+		} catch (Exception e) { }
+		
 		ArrayList<Element> result = null;
 		Form form = null;
-		try {
-			Query query = manager.createQuery("select e from Element e " +
-											  "left join e.form f      " +
-											  "where f.id = :fid       ");
-			query.setParameter("fid", fid);
-			result = (ArrayList<Element>)query.getResultList();
-			form = manager.find(Form.class, fid);
-		} catch (Exception e) {
-			result = new ArrayList<Element>();
+		if (fid != -1) {
+			EntityManagerFactory factory = 	
+					Persistence.createEntityManagerFactory("main");
+			EntityManager manager = factory.createEntityManager();
+			try {
+				Query query = manager.createQuery("select e from Element e " +
+												  "left join e.form f      " +
+												  "where f.id = :fid       ");
+				query.setParameter("fid", fid);
+				result = (ArrayList<Element>)query.getResultList();
+				form = manager.find(Form.class, fid);
+			} catch (Exception e) {
+				
+			}
+			manager.close();
 		}
-		model.addAttribute("form", form);
-		model.addAttribute("elements", result);
+		
+		if (form == null) {
+			return "redirect:/error";
+		} else {
+			model.addAttribute("form", form);
+			model.addAttribute("elements", result);
+			return "display";
+		}
+	}
+	
+	@GetMapping("/login")
+	String showLogInPage() {
+		return "login";	
+	}
+	
+	@PostMapping("/login")
+	String checkPassword(HttpSession session, String email, String password) {		
+		EntityManagerFactory factory = 
+				Persistence.createEntityManagerFactory("main");
+		EntityManager manager = factory.createEntityManager();
+		boolean passed = false;
+		try {
+			Query query = manager.createQuery("select u from User u " +
+											  "where u.email = :e   " +
+											  "and u.password= :p   ");
+			query.setParameter("e", email);
+			query.setParameter("p", encrypt(password));
+			User u = (User)query.getSingleResult();		
+			if (u != null) {
+				passed = true;
+				session.setAttribute("user", u);
+			}
+		} catch (Exception e) { }
 		manager.close();
-		return "display";
+
+		if (passed) {
+			return "redirect:/profile";
+		} else {
+			return "redirect:/login?fail-to-login";
+		}
+	}
+	
+	@GetMapping("/logout")
+	String showLogOut(HttpSession session) {
+		session.removeAttribute("user");
+		return "logout";
+	}
+	
+	@GetMapping("/profile")
+	String showProfile(HttpSession session, Model model) {
+		User user = (User)session.getAttribute("user");
+		if (user == null) {
+			return "redirect:/login";
+		}
+		ArrayList<Form> forms;
+		EntityManagerFactory factory = Persistence
+							.createEntityManagerFactory("main");
+		EntityManager manager = factory.createEntityManager();
+		try {
+			Query query = manager.createQuery("select f from Form f " +
+											  "left join f.user u   " +
+											  "where u.id = :uid    ");
+			query.setParameter("uid", user.id);
+			forms = (ArrayList<Form>)query.getResultList();
+		} catch (Exception e) {
+			forms = new ArrayList<Form>();
+		}
+		
+		model.addAttribute("forms", forms);
+		manager.close();
+		return "profile";
+	}
+	
+	String encrypt(String data) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-512"); 
+			byte[] b = md.digest(data.getBytes()); 
+			BigInteger number = new BigInteger(1, b); 
+			String hash = number.toString(16); 
+			while (hash.length() < 32) { 
+				hash = "0" + hash; 
+			} 
+			return hash;
+		} catch (Exception e) {
+			return e.toString();	
+		}
 	}
 }

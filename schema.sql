@@ -24,7 +24,7 @@ create table elements(
 );
 
 insert into users(email,password,full_name)
-	values('user@email.com', sha2('user',512), 'Administrator');
+	values('user@email.com', sha2('user', 512), 'Administrator');
 insert into forms(user_id, title)
 	values(1, 'Form 1');
 
@@ -36,4 +36,9 @@ insert into elements(form_id, title, type)
 	values(1, 'Element 3', 'slider');
 insert into elements(form_id, title, type)
 	values(1, 'Overall', 'slider');
+	
+	
+insert into users(email,password,full_name)
+values('james@bond.com', sha2('james123', 512), 'James Bond');
+
 	
