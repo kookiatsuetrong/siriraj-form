@@ -1,0 +1,42 @@
+<#include "header.html">
+<div class="container">
+	
+	<form>
+		<h1>${form.title}</h1>
+
+		<#list elements as e>
+			<p>
+				${e.title}
+				<#if e.type == "text">
+					<input type="text"
+						   class="form-control"
+						   placeholder="Input Text" />
+				</#if>
+				<#if e.type == "slider">
+					<input type="range"
+						   min="0"
+						   max="10"
+						   value="0"
+						   class="form-range" />
+				</#if>
+				<#if e.type == 'select'>
+					<select class="form-select">
+						<option>Option</option>
+						<option>Item 1</option>
+						<option>Item 2</option>
+						<option>Item 3</option>
+					</select>	
+				</#if>
+			</p>
+		</#list>	
+			
+		<button class="btn btn-primary">Submit</button>
+		
+	</form>
+</div>
+<style>
+	form {
+		padding-top: 0.5rem;	
+	}
+</style>
+<#include "footer.html">
