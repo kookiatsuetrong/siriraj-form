@@ -1,0 +1,114 @@
+<#include "header.html">
+<div class="container">
+	
+	<form id="main-form">
+		<h1>${form.title}</h1>
+
+		<#list elements as e>
+			<div>
+				${e.title}
+				<#if e.type == "text">
+					<input type="text"
+						   class="form-control"
+						   placeholder="Input Text" />
+				</#if>
+				<#if e.type == "range">
+					<input type="range"
+						   min="0"
+						   max="10"
+						   value="0"
+						   class="form-range" />
+				</#if>
+				<#if e.type == "select">
+					<select class="form-select">
+						<option>Option</option>
+						<option>Item 1</option>
+						<option>Item 2</option>
+						<option>Item 3</option>
+					</select>
+				</#if>
+			</div>
+		</#list>
+
+	</form>
+	
+	<a href="javascript:add()">Add</a>
+
+	<div class="modal fade" id="my-modal" data-backdrop="static" 
+		 data-keyboard="false" tabindex="-1">
+
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="staticBackdropLabel">Element</h5>
+					<button type="button" class="close" data-dismiss="modal">
+						<span>&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<input id="modal-name"
+						class="form-control" 
+						placeholder="Data Name" />
+					<select id="modal-type"
+						class="form-select">
+						<option value="text">Text</option>
+						<option value="range">Range</option>
+					</select>
+				</div>
+				<div class="modal-footer">
+					<button type="button"
+						class="btn btn-secondary"
+						data-dismiss="modal"
+						id="modal-cancel">Cancel</button>
+					<button type="button" 
+						class="btn btn-primary"
+						id="modal-ok">OK</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+<script>
+	var modal = new bootstrap.Modal(document.querySelector("#my-modal"))
+	var cancelButton = document.querySelector("#modal-cancel")
+	var okButton     = document.querySelector("#modal-ok")
+	okButton.onclick = function(e) {
+		var name = document.querySelector("#modal-name").value
+		var type = document.querySelector("#modal-type").value
+		var form = document.querySelector("#main-form")
+		switch (type) {
+			case 'range':
+				typeClass = 'form-range'
+				break
+
+			default:
+				type = 'text'
+				typeClass = 'form-control'
+		}
+		var template = `<div>--name--
+			<input type='--type--' class='--type-class--' />
+		</div>`
+		template = template.replace('--name--', name)
+		template = template.replace('--type--', type)
+		template = template.replace('--type-class--', typeClass)
+
+		form.innerHTML += template
+
+		modal.hide()
+	}
+
+	function add() {
+		document.querySelector("#modal-type").value = "range"
+		modal.show()
+	}
+</script>
+<style>
+	.modal-body > * {
+		margin-bottom: 0.5rem;
+	}
+	form {
+		padding-top: 0.5rem;	
+	}
+</style>
+<#include "footer.html">

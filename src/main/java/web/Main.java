@@ -30,7 +30,7 @@ class Web {
 	}
 	
 	@GetMapping("/form/{id}")
-	String saveProduct(Model model, @PathVariable String id) {
+	String showForm(Model model, @PathVariable String id) {
 		int fid = -1;
 		try {
 			fid = Integer.valueOf(id);
@@ -61,6 +61,49 @@ class Web {
 			model.addAttribute("form", form);
 			model.addAttribute("elements", result);
 			return "display";
+		}
+	}
+
+	@GetMapping("/edit/{id}")
+	String editForm(HttpSession session, Model model, @PathVariable String id) {
+		User user = (User)session.getAttribute("user");
+		if (user == null) {
+			return "redirect:/login";
+		} else {
+			int fid = -1;
+			try {
+				fid = Integer.valueOf(id);
+			} catch (Exception e) { }
+			
+			ArrayList<Element> result = null;
+			Form form = null;
+			if (fid != -1) {
+				EntityManagerFactory factory = 	
+						Persistence.createEntityManagerFactory("main");
+				EntityManager manager = factory.createEntityManager();
+				try {
+					Query query = manager.createQuery("select e from Element e " +
+													"left join e.form f      " +
+													"left join f.user u      " +
+													"where f.id = :fid       " +
+													"and   u.id = :uid       ");
+					query.setParameter("fid", fid);
+					query.setParameter("uid", user.id);
+					result = (ArrayList<Element>)query.getResultList();
+					form = manager.find(Form.class, fid);
+				} catch (Exception e) {
+					
+				}
+				manager.close();
+			}
+			
+			if (form == null) {
+				return "redirect:/error";
+			} else {
+				model.addAttribute("form", form);
+				model.addAttribute("elements", result);
+				return "editor";
+			}
 		}
 	}
 	
@@ -125,6 +168,25 @@ class Web {
 		model.addAttribute("forms", forms);
 		manager.close();
 		return "profile";
+	}
+
+	@GetMapping("/add")
+	String showAddForm(HttpSession session) {
+		User user = (User)session.getAttribute("user");
+		if (user == null) {
+			return "redirect:/login";
+		} else {
+			EntityManagerFactory factory = Persistence
+								.createEntityManagerFactory("main");
+			EntityManager manager = factory.createEntityManager();
+			Form form = new Form();
+			form.title = "New Form";
+			form.user = user;
+			manager.getTransaction().begin();
+			manager.persist(form);
+			manager.getTransaction().commit();
+			return "redirect:/edit/" + form.id;
+		}
 	}
 	
 	String encrypt(String data) {

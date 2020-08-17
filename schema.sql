@@ -29,13 +29,13 @@ insert into forms(user_id, title)
 	values(1, 'Form 1');
 
 insert into elements(form_id, title, type)
-	values(1, 'Element 1', 'slider');
+	values(1, 'Element 1', 'text');
 insert into elements(form_id, title, type)
-	values(1, 'Element 2', 'slider');
+	values(1, 'Element 2', 'range');
 insert into elements(form_id, title, type)
-	values(1, 'Element 3', 'slider');
+	values(1, 'Element 3', 'text');
 insert into elements(form_id, title, type)
-	values(1, 'Overall', 'slider');
+	values(1, 'Overall', 'range');
 	
 	
 insert into users(email,password,full_name)
