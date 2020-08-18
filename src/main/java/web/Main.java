@@ -188,7 +188,64 @@ class Web {
 			return "redirect:/edit/" + form.id;
 		}
 	}
+
+	@GetMapping("/add-element-simple") @ResponseBody
+	String addElementSimple(String name, String type, Integer form, HttpSession session) {
+		User user = (User)session.getAttribute("user");
+		if (user == null || form == null) {
+			return "Invalid User";
+		} else {
+			EntityManagerFactory factory = Persistence
+										.createEntityManagerFactory("main");
+			EntityManager manager = factory.createEntityManager();
+			String result = "OK";
+			try {
+				Form f = manager.find(Form.class, form);
+				Element e = new Element();
+				e.type  = type;
+				e.title = name;
+				e.form  = f;
+				manager.getTransaction().begin();
+				manager.persist(e);
+				manager.getTransaction().commit();
+			} catch (Exception e) {
+				result = e.toString();
+				System.out.println(e);
+			}
+			manager.close();
+			return result;
+		}
+	}
+
+
+	@PostMapping("/add-element") @ResponseBody
+	String addElement(String name, String type, Integer form, HttpSession session) {
+		User user = (User)session.getAttribute("user");
+		if (user == null || form == null) {
+			return "Invalid User";
+		} else {
+			EntityManagerFactory factory = Persistence
+										.createEntityManagerFactory("main");
+			EntityManager manager = factory.createEntityManager();
+			String result = "OK";
+			try {
+				Form f = manager.find(Form.class, form);
+				Element e = new Element();
+				e.type  = type;
+				e.title = name;
+				e.form  = f;
+				manager.getTransaction().begin();
+				manager.persist(e);
+				manager.getTransaction().commit();
+			} catch (Exception e) {
+				result = e.toString();
+			}
+			manager.close();
+			return result;
+		}
+	}
 	
+	/*
 	@PostMapping(value="/save", consumes="application/json") @ResponseBody
 	List saveForm(HttpSession session, 
 						@RequestBody Map<String, List<Element>> data) {
@@ -198,6 +255,7 @@ class Web {
 		
 		return all;
 	}
+	*/
 	
 	String encrypt(String data) {
 		try {

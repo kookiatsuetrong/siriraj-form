@@ -76,6 +76,7 @@
 
 </div>
 <script>
+	var formId = ${form.id}
 	var modal = new bootstrap.Modal(document.querySelector("#my-modal"))
 	var cancelButton = document.querySelector("#modal-cancel")
 	var okButton     = document.querySelector("#modal-ok")
@@ -102,6 +103,19 @@
 		template = template.replace('--type-class--', typeClass)
 
 		form.innerHTML += template
+
+		fetch('/add-element', { 
+			method:'post',
+			body: 'form=' + formId + 
+					'&name=' + name +
+					'&type=' + type,
+			headers: {
+				'Content-Type': 'application/x-www-form-urlencoded'
+			}
+		}).then( r => r.text() )
+		.then( d => {
+			console.log(d)
+		})
 
 		modal.hide()
 	}
