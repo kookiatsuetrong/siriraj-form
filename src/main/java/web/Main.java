@@ -189,6 +189,29 @@ class Web {
 		}
 	}
 
+	@PostMapping("/save-form") @ResponseBody
+	String saveForm(Integer form, String title, HttpSession session) {
+		User user = (User)session.getAttribute("user");
+		if (user == null || form == null) {
+			return "Invalid";
+		} else {
+			EntityManagerFactory factory = Persistence
+										.createEntityManagerFactory("main");
+			EntityManager manager = factory.createEntityManager();
+			try {
+				Form f = manager.find(Form.class, form);
+				if (f.user.id == user.id) {
+					f.title = title;
+					manager.getTransaction().begin();
+					manager.persist(f);
+					manager.getTransaction().commit();
+				}
+			} catch (Exception x) { }
+			manager.close();
+			return "OK";
+		}
+	}
+
 	@PostMapping("/add-element") @ResponseBody
 	Element addElement(String name, String type, Integer form, HttpSession session) {
 		Element e = new Element();

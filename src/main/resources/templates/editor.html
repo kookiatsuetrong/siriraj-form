@@ -2,12 +2,53 @@
 <div class="container">
 	
 	<form id="main-form">
-		<h1>${form.title}</h1>
+		<a class='edit-form' href='javascript:editForm()'>
+			<svg class='big' width="96" height="96" viewBox="0 0 24 24" 
+				fill="none" stroke="#333" stroke-width="2" 
+				stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="12" cy="12" r="3"></circle>
+				<path d="M19.4 15a1.65 1.65 0 0 0 .33 
+						1.82l.06.06a2 2 0 0 1 0 2.83 
+						2 2 0 0 1-2.83 0l-.06-.06a1.65 
+						1.65 0 0 0-1.82-.33 1.65 1.65 
+						0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 
+						0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 
+						19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 
+						2 0 0 1-2.83 0 2 2 0 0 1 
+						0-2.83l.06-.06a1.65 1.65 0 0 0 
+						.33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 
+						2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 
+						1.65 0 0 0 4.6 9a1.65 1.65 0 0 
+						0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 
+						2 2 0 0 1 2.83 0l.06.06a1.65 1.65 
+						0 0 0 1.82.33H9a1.65 1.65 0 0 0 
+						1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 
+						2v.09a1.65 1.65 0 0 0 1 1.51 1.65 
+						1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 
+						1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 
+						1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 
+						1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 
+						2h-.09a1.65 1.65 0 0 0-1.51 1z">
+				</path>
+			</svg>
+		</a>
+		<h1 id='form-title'>${form.title}</h1>
 
 		<#list elements as e>
 			<div class='element' element-id="${e.id}">
 				<label>${e.title}</label>
-				<a href='javascript:remove(${e.id})'>&times;</a>
+				<a href='javascript:edit(${e.id})'>
+					<svg class="normal" width="96" height="96" 
+						viewBox="0 0 24 24" fill="none" 
+						stroke="#333" stroke-width="2" 
+						stroke-linecap="round" stroke-linejoin="round">
+						<path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 
+								2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34">
+						</path>
+						<polygon points="18 2 22 6 12 16 8 16 8 12 18 2">
+						</polygon>
+					</svg>
+				</a>
 				<#if e.type == "text">
 					<input type="text"
 						   class="form-control"
@@ -33,8 +74,63 @@
 
 	</form>
 	
-	<a href="javascript:add()">Add</a>
+	<a href="javascript:addElement()">Add</a>
 	<a href="/profile">Home</a>
+
+
+	<div class="modal fade" id="edit-form-modal" data-backdrop="static" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Form Editor</h5>
+					<button type="button" class="close" data-dismiss="modal">
+						<span>&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<input id="edit-form-modal-title"
+						class="form-control"
+						placeholder="Form Title" />
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal"
+						id="edit-form-modal-cancel">Cancel</button>
+					<button type="button" class="btn btn-primary"
+						id="edit-form-modal-ok">OK</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		var formId = ${form.id}
+		var formTitle = '${form.title}'
+
+		var formEditorDialog = new bootstrap.Modal(document.querySelector("#edit-form-modal"))
+		var formEditorOk = document.querySelector("#edit-form-modal-ok")
+
+		formEditorOk.onclick = function(e) {
+			var title = document.querySelector("#edit-form-modal-title")
+			fetch('/save-form', {
+				method: 'post',
+				body: 'title=' + title.value + "&form=" + formId,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+			}).then( r => r.text() )
+			.then( d => {
+				formTitle = title.value
+				document.querySelector("#form-title").innerHTML = formTitle
+				formEditorDialog.hide()
+			})
+		}
+
+		function editForm() {
+			var title = document.querySelector("#edit-form-modal-title")
+			title.value = formTitle
+			formEditorDialog.show()
+		}
+	</script>
+
 
 	<div class="modal fade" id="my-modal" data-backdrop="static" 
 		 data-keyboard="false" tabindex="-1">
@@ -72,7 +168,6 @@
 
 </div>
 <script>
-	var formId = ${form.id}
 	var modal = new bootstrap.Modal(document.querySelector("#my-modal"))
 	var cancelButton = document.querySelector("#modal-cancel")
 	var okButton     = document.querySelector("#modal-ok")
@@ -105,7 +200,18 @@
 			if (d.id > 0) {
 				var template = `<div class='element' element-id='--element-id--'>
 					<label>--name--</label>
-					<a href='javascript:remove(--element-id--)'>&times;</a>
+					<a href='javascript:edit(--element-id--)'>
+						<svg class="normal" width="96" height="96" 
+							viewBox="0 0 24 24" fill="none" 
+							stroke="#333" stroke-width="2" 
+							stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 
+									2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34">
+							</path>
+							<polygon points="18 2 22 6 12 16 8 16 8 12 18 2">
+							</polygon>
+						</svg>
+					</a>
 					<input type='--type--' class='--type-class--' />
 				</div>`
 				template = template.replace('--name--', name)
@@ -117,18 +223,17 @@
 				form.innerHTML += template
 			}
 
-
 			modal.hide()
 		})
 		
 	}
 
-	function add() {
+	function addElement() {
 		document.querySelector("#modal-type").value = "range"
 		modal.show()
 	}
 	
-	function remove(id) {
+	function removeElement(id) {
 		fetch('/remove-element/' + id)
 		.then(r => r.json())
 		.then(d => {
@@ -144,62 +249,8 @@
 			}
 		})
 	}
-	
-	/* function save() {
-		var list = [ ]
-		var all = document.querySelectorAll("div.element")
-		for (var i in all) {
-			if (all[i].firstElementChild != null) {
-				var item = { }
-				item.name = all[i].firstElementChild.innerText
-				item.type = "text"
-				var second = all[i].firstElementChild.nextElementSibling
-				if (second.nodeName == "SELECT") {
-					item.type = "select"
-				}
-				if (second.nodeName == "INPUT" &&
-					second.type == "range") {
-					item.type = "range"
-				}
-				item.id = 0
-				if (second.hasAttribute("element-id")) {
-					item.id = second.getAttribute("element-id")
-				}
-				console.log(item)
-				list.push(item)
-			}
-		}
-		
-		fetch('/save', {
-				method:'post',
-				body: JSON.stringify({data:list}),
-				headers: {
-					"Content-Type": "application/json"	
-				}
-			}
-		).then( r => r.json() )
-		.then( d => {
-			console.log(d)
-		})
-	} */
+
 </script>
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 
 <style>
 	.modal-body > * {
@@ -207,6 +258,17 @@
 	}
 	form {
 		padding-top: 0.5rem;	
+	}
+	svg.big {
+		width: 2rem;
+		height: 2rem;
+	}
+	svg.normal {
+		width: 1rem;
+		height: 1rem;
+	}
+	.edit-form {
+		float: right;
 	}
 </style>
 <#include "footer.html">
