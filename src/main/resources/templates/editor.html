@@ -5,26 +5,23 @@
 		<h1>${form.title}</h1>
 
 		<#list elements as e>
-			<div class='element'>
+			<div class='element' element-id="${e.id}">
 				<label>${e.title}</label>
+				<a href='javascript:remove(${e.id})'>&times;</a>
 				<#if e.type == "text">
 					<input type="text"
 						   class="form-control"
-						   placeholder="Input Text"
-						   element-id="${e.id}" />
+						   placeholder="Input Text" />
 				</#if>
 				<#if e.type == "range">
 					<input type="range"
 						   min="0"
 						   max="10"
 						   value="0"
-						   class="form-range" 
-						   element-id="${e.id}" />
+						   class="form-range" />
 				</#if>
 				<#if e.type == "select">
-					<select class="form-select"
-						   element-id="${e.id}"
-					>
+					<select class="form-select">
 						<option>Option</option>
 						<option>Item 1</option>
 						<option>Item 2</option>
@@ -37,7 +34,6 @@
 	</form>
 	
 	<a href="javascript:add()">Add</a>
-	
 	<a href="javascript:save()">Save</a>
 
 	<div class="modal fade" id="my-modal" data-backdrop="static" 
@@ -94,17 +90,8 @@
 				type = 'text'
 				typeClass = 'form-control'
 		}
-		var template = `<div class='element'>
-			<label>--name--</label>
-			<input type='--type--' class='--type-class--' />
-		</div>`
-		template = template.replace('--name--', name)
-		template = template.replace('--type--', type)
-		template = template.replace('--type-class--', typeClass)
-
-		form.innerHTML += template
-
-		fetch('/add-element', { 
+		
+		fetch('/add-element', {
 			method:'post',
 			body: 'form=' + formId + 
 					'&name=' + name +
@@ -112,12 +99,28 @@
 			headers: {
 				'Content-Type': 'application/x-www-form-urlencoded'
 			}
-		}).then( r => r.text() )
+		}).then( r => r.json() )
 		.then( d => {
 			console.log(d)
-		})
+			if (d.id > 0) {
+				var template = `<div class='element' element-id='--element-id--'>
+					<label>--name--</label>
+					<a href='javascript:remove(--element-id--)'>&times;</a>
+					<input type='--type--' class='--type-class--' />
+				</div>`
+				template = template.replace('--name--', name)
+				template = template.replace('--type--', type)
+				template = template.replace('--type-class--', typeClass)
+				template = template.replace('--element-id--', d.id)
+				template = template.replace('--element-id--', d.id)
 
-		modal.hide()
+				form.innerHTML += template
+			}
+
+
+			modal.hide()
+		})
+		
 	}
 
 	function add() {
@@ -125,7 +128,24 @@
 		modal.show()
 	}
 	
-	function save() {
+	function remove(id) {
+		fetch('/remove-element/' + id)
+		.then(r => r.json())
+		.then(d => {
+			var all = document.querySelectorAll("div.element")
+			var element = null
+			for (var i = 0; i < all.length; i++) {
+				if (id == all[i].getAttribute('element-id') ) {
+					element = all[i]
+				}
+			}
+			if (element != null) {
+				element.style.display = 'none'
+			}
+		})
+	}
+	
+	/* function save() {
 		var list = [ ]
 		var all = document.querySelectorAll("div.element")
 		for (var i in all) {
@@ -150,8 +170,6 @@
 			}
 		}
 		
-		
-
 		fetch('/save', {
 				method:'post',
 				body: JSON.stringify({data:list}),
@@ -163,7 +181,7 @@
 		.then( d => {
 			console.log(d)
 		})
-	}
+	} */
 </script>
 	
 	

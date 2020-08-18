@@ -189,59 +189,53 @@ class Web {
 		}
 	}
 
-	@GetMapping("/add-element-simple") @ResponseBody
-	String addElementSimple(String name, String type, Integer form, HttpSession session) {
+	@PostMapping("/add-element") @ResponseBody
+	Element addElement(String name, String type, Integer form, HttpSession session) {
+		Element e = new Element();
 		User user = (User)session.getAttribute("user");
 		if (user == null || form == null) {
-			return "Invalid User";
+			return e;
 		} else {
 			EntityManagerFactory factory = Persistence
 										.createEntityManagerFactory("main");
 			EntityManager manager = factory.createEntityManager();
-			String result = "OK";
 			try {
 				Form f = manager.find(Form.class, form);
-				Element e = new Element();
-				e.type  = type;
-				e.title = name;
-				e.form  = f;
-				manager.getTransaction().begin();
-				manager.persist(e);
-				manager.getTransaction().commit();
-			} catch (Exception e) {
-				result = e.toString();
-				System.out.println(e);
-			}
+				if (f.user.id == user.id) {
+					e.type  = type;
+					e.title = name;
+					e.form  = f;
+					manager.getTransaction().begin();
+					manager.persist(e);
+					manager.getTransaction().commit();
+				}
+			} catch (Exception x) { }
 			manager.close();
-			return result;
+			return e;
 		}
 	}
-
-
-	@PostMapping("/add-element") @ResponseBody
-	String addElement(String name, String type, Integer form, HttpSession session) {
+	
+	@GetMapping("/remove-element/{eid}") @ResponseBody
+	Element addElement(@PathVariable Integer eid, HttpSession session) {
+		Element e = new Element();
 		User user = (User)session.getAttribute("user");
-		if (user == null || form == null) {
-			return "Invalid User";
+		if (user == null || eid == null) {
+			return e;
 		} else {
 			EntityManagerFactory factory = Persistence
 										.createEntityManagerFactory("main");
 			EntityManager manager = factory.createEntityManager();
-			String result = "OK";
 			try {
-				Form f = manager.find(Form.class, form);
-				Element e = new Element();
-				e.type  = type;
-				e.title = name;
-				e.form  = f;
-				manager.getTransaction().begin();
-				manager.persist(e);
-				manager.getTransaction().commit();
-			} catch (Exception e) {
-				result = e.toString();
-			}
+				Element t = manager.find(Element.class, eid);
+				if (t.form.user.id == user.id) {
+					e = t;
+					manager.getTransaction().begin();
+					manager.remove(t);
+					manager.getTransaction().commit();
+				}
+			} catch (Exception x) { }
 			manager.close();
-			return result;
+			return e;
 		}
 	}
 	
