@@ -11,6 +11,7 @@ public class Element {
 	public String title;
 	public String type;
 	
+	public int getId()       { return id;    }
 	public String getTitle() { return title; }
 	public String getType()  { return type;  }
 }

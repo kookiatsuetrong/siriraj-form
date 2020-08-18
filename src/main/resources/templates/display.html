@@ -5,8 +5,8 @@
 		<h1>${form.title}</h1>
 
 		<#list elements as e>
-			<div>
-				${e.title}
+			<div class='element'>
+				<label>${e.title}</label>
 				<#if e.type == "text">
 					<input type="text"
 						   class="form-control"
@@ -37,7 +37,7 @@
 
 <style>
 	form {
-		padding-top: 0.5rem;	
+		padding-top: 0.5rem;
 	}
 </style>
 <#include "footer.html">

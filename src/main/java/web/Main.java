@@ -39,8 +39,8 @@ class Web {
 		ArrayList<Element> result = null;
 		Form form = null;
 		if (fid != -1) {
-			EntityManagerFactory factory = 	
-					Persistence.createEntityManagerFactory("main");
+			EntityManagerFactory factory = Persistence
+										.createEntityManagerFactory("main");
 			EntityManager manager = factory.createEntityManager();
 			try {
 				Query query = manager.createQuery("select e from Element e " +
@@ -77,9 +77,9 @@ class Web {
 			
 			ArrayList<Element> result = null;
 			Form form = null;
-			if (fid != -1) {
-				EntityManagerFactory factory = 	
-						Persistence.createEntityManagerFactory("main");
+			if (fid != -1) {		
+				EntityManagerFactory factory = Persistence
+											.createEntityManagerFactory("main");
 				EntityManager manager = factory.createEntityManager();
 				try {
 					Query query = manager.createQuery("select e from Element e " +
@@ -114,8 +114,8 @@ class Web {
 	
 	@PostMapping("/login")
 	String checkPassword(HttpSession session, String email, String password) {		
-		EntityManagerFactory factory = 
-				Persistence.createEntityManagerFactory("main");
+		EntityManagerFactory factory = Persistence
+										.createEntityManagerFactory("main");
 		EntityManager manager = factory.createEntityManager();
 		boolean passed = false;
 		try {
@@ -153,7 +153,7 @@ class Web {
 		}
 		ArrayList<Form> forms;
 		EntityManagerFactory factory = Persistence
-							.createEntityManagerFactory("main");
+										.createEntityManagerFactory("main");
 		EntityManager manager = factory.createEntityManager();
 		try {
 			Query query = manager.createQuery("select f from Form f " +
@@ -177,7 +177,7 @@ class Web {
 			return "redirect:/login";
 		} else {
 			EntityManagerFactory factory = Persistence
-								.createEntityManagerFactory("main");
+										.createEntityManagerFactory("main");
 			EntityManager manager = factory.createEntityManager();
 			Form form = new Form();
 			form.title = "New Form";
@@ -187,6 +187,16 @@ class Web {
 			manager.getTransaction().commit();
 			return "redirect:/edit/" + form.id;
 		}
+	}
+	
+	@PostMapping(value="/save", consumes="application/json") @ResponseBody
+	List saveForm(HttpSession session, 
+						@RequestBody Map<String, List<Element>> data) {
+		List<Element> all = data.get("data");
+		
+		// for each element, change or insert a new one
+		
+		return all;
 	}
 	
 	String encrypt(String data) {

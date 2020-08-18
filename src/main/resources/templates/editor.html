@@ -5,22 +5,26 @@
 		<h1>${form.title}</h1>
 
 		<#list elements as e>
-			<div>
-				${e.title}
+			<div class='element'>
+				<label>${e.title}</label>
 				<#if e.type == "text">
 					<input type="text"
 						   class="form-control"
-						   placeholder="Input Text" />
+						   placeholder="Input Text"
+						   element-id="${e.id}" />
 				</#if>
 				<#if e.type == "range">
 					<input type="range"
 						   min="0"
 						   max="10"
 						   value="0"
-						   class="form-range" />
+						   class="form-range" 
+						   element-id="${e.id}" />
 				</#if>
 				<#if e.type == "select">
-					<select class="form-select">
+					<select class="form-select"
+						   element-id="${e.id}"
+					>
 						<option>Option</option>
 						<option>Item 1</option>
 						<option>Item 2</option>
@@ -33,6 +37,8 @@
 	</form>
 	
 	<a href="javascript:add()">Add</a>
+	
+	<a href="javascript:save()">Save</a>
 
 	<div class="modal fade" id="my-modal" data-backdrop="static" 
 		 data-keyboard="false" tabindex="-1">
@@ -73,6 +79,7 @@
 	var modal = new bootstrap.Modal(document.querySelector("#my-modal"))
 	var cancelButton = document.querySelector("#modal-cancel")
 	var okButton     = document.querySelector("#modal-ok")
+	
 	okButton.onclick = function(e) {
 		var name = document.querySelector("#modal-name").value
 		var type = document.querySelector("#modal-type").value
@@ -86,7 +93,8 @@
 				type = 'text'
 				typeClass = 'form-control'
 		}
-		var template = `<div>--name--
+		var template = `<div class='element'>
+			<label>--name--</label>
 			<input type='--type--' class='--type-class--' />
 		</div>`
 		template = template.replace('--name--', name)
@@ -102,7 +110,65 @@
 		document.querySelector("#modal-type").value = "range"
 		modal.show()
 	}
+	
+	function save() {
+		var list = [ ]
+		var all = document.querySelectorAll("div.element")
+		for (var i in all) {
+			if (all[i].firstElementChild != null) {
+				var item = { }
+				item.name = all[i].firstElementChild.innerText
+				item.type = "text"
+				var second = all[i].firstElementChild.nextElementSibling
+				if (second.nodeName == "SELECT") {
+					item.type = "select"
+				}
+				if (second.nodeName == "INPUT" &&
+					second.type == "range") {
+					item.type = "range"
+				}
+				item.id = 0
+				if (second.hasAttribute("element-id")) {
+					item.id = second.getAttribute("element-id")
+				}
+				console.log(item)
+				list.push(item)
+			}
+		}
+		
+		
+
+		fetch('/save', {
+				method:'post',
+				body: JSON.stringify({data:list}),
+				headers: {
+					"Content-Type": "application/json"	
+				}
+			}
+		).then( r => r.json() )
+		.then( d => {
+			console.log(d)
+		})
+	}
 </script>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
 <style>
 	.modal-body > * {
 		margin-bottom: 0.5rem;
