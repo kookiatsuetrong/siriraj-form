@@ -170,7 +170,7 @@ class Web {
 		return "profile";
 	}
 
-	@GetMapping("/add")
+	@GetMapping("/add-form")
 	String showAddForm(HttpSession session) {
 		User user = (User)session.getAttribute("user");
 		if (user == null) {

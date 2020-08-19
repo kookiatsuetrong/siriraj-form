@@ -37,7 +37,9 @@
 		<#list elements as e>
 			<div class='element' element-id="${e.id}">
 				<label>${e.title}</label>
-				<a href='javascript:edit(${e.id})'>
+				<a href='javascript:removeElement(${e.id})'
+					>&times;</a>
+				<a href='javascript:editElement(${e.id})'>
 					<svg class="normal" width="96" height="96" 
 						viewBox="0 0 24 24" fill="none" 
 						stroke="#333" stroke-width="2" 
@@ -74,8 +76,84 @@
 
 	</form>
 	
-	<a href="javascript:addElement()">Add</a>
+	<a href="javascript:addElement('New Text', 'text')">Text</a>
+	<a href="javascript:addElement('Data Element', 'range')">Slider</a>
 	<a href="/profile">Home</a>
+
+	<script>
+		function addElement(title, type) {
+			var typeClass = ''
+			switch (type) {
+				case 'range':
+					typeClass = 'form-range'
+					break
+
+				default:
+					type = 'text'
+					typeClass = 'form-control'
+			}
+			fetch('/add-element', {
+				method:'post',
+				body: 'form=' + formId + 
+						'&name=' + title +
+						'&type=' + type,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				}
+				})
+			.then( r => r.json() )
+			.then( d => {
+				console.log(d)
+				if (d.id > 0) {
+					var template = `<div class='element' element-id='--element-id--'>
+						<label>--name--</label>
+						<a href='javascript:removeElement(--element-id--)'
+							>&times;</a>
+						<a href='javascript:editElement(--element-id--)'>
+							<svg class="normal" width="96" height="96" 
+								viewBox="0 0 24 24" fill="none" 
+								stroke="#333" stroke-width="2" 
+								stroke-linecap="round" stroke-linejoin="round">
+								<path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 
+										2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34">
+								</path>
+								<polygon points="18 2 22 6 12 16 8 16 8 12 18 2">
+								</polygon>
+							</svg>
+						</a>
+						<input type='--type--' class='--type-class--' />
+					</div>`
+					template = template.replace('--name--', title)
+					template = template.replace('--type--', type)
+					template = template.replace('--type-class--', typeClass)
+					template = template.replace('--element-id--', d.id)
+					template = template.replace('--element-id--', d.id)
+					template = template.replace('--element-id--', d.id)
+
+					var form = document.querySelector("#main-form")
+					form.innerHTML += template
+				}
+			})
+		}
+
+		function removeElement(id) {
+			fetch('/remove-element/' + id)
+			.then(r => r.json())
+			.then(d => {
+				var all = document.querySelectorAll("div.element")
+				var element = null
+				for (var i = 0; i < all.length; i++) {
+					if (id == all[i].getAttribute('element-id') ) {
+						element = all[i]
+					}
+				}
+				if (element != null) {
+					element.style.display = 'none'
+				}
+			})
+		}
+
+	</script>
 
 
 	<div class="modal fade" id="edit-form-modal" data-backdrop="static" tabindex="-1">
@@ -131,6 +209,38 @@
 		}
 	</script>
 
+<style>
+	.modal-body > * {
+		margin-bottom: 0.5rem;
+	}
+	form {
+		padding-top: 0.5rem;	
+	}
+	svg.big {
+		width: 2rem;
+		height: 2rem;
+	}
+	svg.normal {
+		width: 1rem;
+		height: 1rem;
+	}
+	a > svg.normal {
+		margin-top: -0.4rem;
+	}
+	a:hover > svg {
+		stroke: green;
+	}
+	.edit-form {
+		float: right;
+	}
+	.element {
+		margin-bottom: 1rem;
+	}
+</style>
+
+
+
+
 
 	<div class="modal fade" id="my-modal" data-backdrop="static" 
 		 data-keyboard="false" tabindex="-1">
@@ -165,7 +275,6 @@
 			</div>
 		</div>
 	</div>
-
 </div>
 <script>
 	var modal = new bootstrap.Modal(document.querySelector("#my-modal"))
@@ -228,47 +337,11 @@
 		
 	}
 
-	function addElement() {
-		document.querySelector("#modal-type").value = "range"
-		modal.show()
-	}
+	// function addElement() {
+	// 	document.querySelector("#modal-type").value = "range"
+	// 	modal.show()
+	// }
 	
-	function removeElement(id) {
-		fetch('/remove-element/' + id)
-		.then(r => r.json())
-		.then(d => {
-			var all = document.querySelectorAll("div.element")
-			var element = null
-			for (var i = 0; i < all.length; i++) {
-				if (id == all[i].getAttribute('element-id') ) {
-					element = all[i]
-				}
-			}
-			if (element != null) {
-				element.style.display = 'none'
-			}
-		})
-	}
-
 </script>
 
-<style>
-	.modal-body > * {
-		margin-bottom: 0.5rem;
-	}
-	form {
-		padding-top: 0.5rem;	
-	}
-	svg.big {
-		width: 2rem;
-		height: 2rem;
-	}
-	svg.normal {
-		width: 1rem;
-		height: 1rem;
-	}
-	.edit-form {
-		float: right;
-	}
-</style>
 <#include "footer.html">
