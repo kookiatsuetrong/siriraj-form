@@ -35,10 +35,8 @@
 		<h1 id='form-title'>${form.title}</h1>
 
 		<#list elements as e>
-			<div class='element' element-id="${e.id}">
+			<div class='element' element-id="${e.id}" element-type="${e.type}">
 				<label>${e.title}</label>
-				<a href='javascript:removeElement(${e.id})'
-					>&times;</a>
 				<a href='javascript:editElement(${e.id})'>
 					<svg class="normal" width="96" height="96" 
 						viewBox="0 0 24 24" fill="none" 
@@ -105,10 +103,9 @@
 			.then( d => {
 				console.log(d)
 				if (d.id > 0) {
-					var template = `<div class='element' element-id='--element-id--'>
+					var template = `<div class='element' element-id='--element-id--'
+							element-type='--type--'>
 						<label>--name--</label>
-						<a href='javascript:removeElement(--element-id--)'
-							>&times;</a>
 						<a href='javascript:editElement(--element-id--)'>
 							<svg class="normal" width="96" height="96" 
 								viewBox="0 0 24 24" fill="none" 
@@ -125,8 +122,8 @@
 					</div>`
 					template = template.replace('--name--', title)
 					template = template.replace('--type--', type)
+					template = template.replace('--type--', type)
 					template = template.replace('--type-class--', typeClass)
-					template = template.replace('--element-id--', d.id)
 					template = template.replace('--element-id--', d.id)
 					template = template.replace('--element-id--', d.id)
 
@@ -137,24 +134,40 @@
 		}
 
 		function removeElement(id) {
+			var all = document.querySelectorAll("div.element")
+			var element = null
+			for (var i = 0; i < all.length; i++) {
+				if (id == all[i].getAttribute('element-id') ) {
+					element = all[i]
+				}
+			}
+			if (element != null) {
+				element.style.display = 'none'
+			}
 			fetch('/remove-element/' + id)
 			.then(r => r.json())
-			.then(d => {
-				var all = document.querySelectorAll("div.element")
-				var element = null
-				for (var i = 0; i < all.length; i++) {
-					if (id == all[i].getAttribute('element-id') ) {
-						element = all[i]
-					}
-				}
-				if (element != null) {
-					element.style.display = 'none'
-				}
-			})
+			.then(d => {})
 		}
 
+		function editElement(id) {
+			var all = document.querySelectorAll("div.element")
+			var element = null
+			for (var i = 0; i < all.length; i++) {
+				if (id == all[i].getAttribute('element-id') ) {
+					element = all[i]
+				}
+			}
+			if (element != null) {
+				var type = element.getAttribute("element-type")
+				if (type == 'range') {
+					editRange(element)
+				}
+				if (type == 'text') {
+					editText(element)
+				}
+			}
+		}
 	</script>
-
 
 	<div class="modal fade" id="edit-form-modal" data-backdrop="static" tabindex="-1">
 		<div class="modal-dialog">
@@ -171,10 +184,8 @@
 						placeholder="Form Title" />
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal"
-						id="edit-form-modal-cancel">Cancel</button>
 					<button type="button" class="btn btn-primary"
-						id="edit-form-modal-ok">OK</button>
+						id="edit-form-modal-ok">Save</button>
 				</div>
 			</div>
 		</div>
@@ -209,6 +220,52 @@
 		}
 	</script>
 
+	<div class="modal fade" id="edit-text-modal" data-backdrop="static" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Text</h5>
+					<button type="button" class="close" data-dismiss="modal">
+						<span>&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<input id="edit-text-modal-title"
+						class="form-control"
+						placeholder="Title" />
+					<input id="edit-text-modal-id" type="hidden" />
+				</div>
+				<div class="modal-footer" style="justify-content: space-between;">
+					<button type="button" class="btn btn-danger"
+						id="edit-text-modal-delete">Delete</button>
+					<button type="button" class="btn btn-primary"
+						id="edit-text-modal-ok">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		function editText(element) {
+			var title   = document.querySelector("#edit-text-modal-title")
+			title.value = element.firstElementChild.innerText
+			var id      = document.querySelector("#edit-text-modal-id")
+			id.value = element.getAttribute("element-id")
+			textEditorDialog.show()
+		}
+		var textEditorDialog = new bootstrap.Modal(document.querySelector("#edit-text-modal"))
+		var textEditorOk = document.querySelector("#edit-text-modal-ok")
+		var textEditorDelete = document.querySelector("#edit-text-modal-delete")
+		textEditorDelete.onclick = function(e) {
+			var id = document.querySelector("#edit-text-modal-id")
+			removeElement(id.value)
+			textEditorDialog.hide()
+		}
+		textEditorOk.onclick = function(e) {
+			var title = document.querySelector("#edit-text-modal-title")
+			console.log(title.value)
+		}
+	</script>
+
 <style>
 	.modal-body > * {
 		margin-bottom: 0.5rem;
@@ -237,111 +294,5 @@
 		margin-bottom: 1rem;
 	}
 </style>
-
-
-
-
-
-	<div class="modal fade" id="my-modal" data-backdrop="static" 
-		 data-keyboard="false" tabindex="-1">
-
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="staticBackdropLabel">Element</h5>
-					<button type="button" class="close" data-dismiss="modal">
-						<span>&times;</span>
-					</button>
-				</div>
-				<div class="modal-body">
-					<input id="modal-name"
-						class="form-control" 
-						placeholder="Data Name" />
-					<select id="modal-type"
-						class="form-select">
-						<option value="text">Text</option>
-						<option value="range">Range</option>
-					</select>
-				</div>
-				<div class="modal-footer">
-					<button type="button"
-						class="btn btn-secondary"
-						data-dismiss="modal"
-						id="modal-cancel">Cancel</button>
-					<button type="button" 
-						class="btn btn-primary"
-						id="modal-ok">OK</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-<script>
-	var modal = new bootstrap.Modal(document.querySelector("#my-modal"))
-	var cancelButton = document.querySelector("#modal-cancel")
-	var okButton     = document.querySelector("#modal-ok")
-	
-	okButton.onclick = function(e) {
-		var name = document.querySelector("#modal-name").value
-		var type = document.querySelector("#modal-type").value
-		var form = document.querySelector("#main-form")
-		switch (type) {
-			case 'range':
-				typeClass = 'form-range'
-				break
-
-			default:
-				type = 'text'
-				typeClass = 'form-control'
-		}
-		
-		fetch('/add-element', {
-			method:'post',
-			body: 'form=' + formId + 
-					'&name=' + name +
-					'&type=' + type,
-			headers: {
-				'Content-Type': 'application/x-www-form-urlencoded'
-			}
-		}).then( r => r.json() )
-		.then( d => {
-			console.log(d)
-			if (d.id > 0) {
-				var template = `<div class='element' element-id='--element-id--'>
-					<label>--name--</label>
-					<a href='javascript:edit(--element-id--)'>
-						<svg class="normal" width="96" height="96" 
-							viewBox="0 0 24 24" fill="none" 
-							stroke="#333" stroke-width="2" 
-							stroke-linecap="round" stroke-linejoin="round">
-							<path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 
-									2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34">
-							</path>
-							<polygon points="18 2 22 6 12 16 8 16 8 12 18 2">
-							</polygon>
-						</svg>
-					</a>
-					<input type='--type--' class='--type-class--' />
-				</div>`
-				template = template.replace('--name--', name)
-				template = template.replace('--type--', type)
-				template = template.replace('--type-class--', typeClass)
-				template = template.replace('--element-id--', d.id)
-				template = template.replace('--element-id--', d.id)
-
-				form.innerHTML += template
-			}
-
-			modal.hide()
-		})
-		
-	}
-
-	// function addElement() {
-	// 	document.querySelector("#modal-type").value = "range"
-	// 	modal.show()
-	// }
-	
-</script>
 
 <#include "footer.html">
