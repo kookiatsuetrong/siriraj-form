@@ -228,6 +228,8 @@ class Web {
 					e.type  = type;
 					e.title = name;
 					e.form  = f;
+					e.min   = 0;
+					e.max   = 10;
 					manager.getTransaction().begin();
 					manager.persist(e);
 					manager.getTransaction().commit();

@@ -14,10 +14,9 @@
 				</#if>
 				<#if e.type == "range">
 					<input type="range"
-						   min="0"
-						   max="10"
+						   min="${e.min !  0}"
+						   max="${e.max ! 10}"
 						   value="0"
-						   step
 						   class="form-range" />
 				</#if>
 				<#if e.type == "select">
