@@ -267,7 +267,9 @@ class Web {
 	Element saveElement(HttpSession session, 
 						@PathVariable Integer eid, 
 						String title, 
-						String placeholder) 
+						String placeholder,
+					    Integer min, 
+						Integer max) 
 	{
 		Element e = new Element();
 		User user = (User)session.getAttribute("user");
@@ -282,6 +284,8 @@ class Web {
 				if (t.form.user.id == user.id) {
 					t.title = title;
 					t.placeholder = placeholder;
+					t.min = min;
+					t.max = max;
 					manager.getTransaction().begin();
 					manager.persist(t);
 					manager.getTransaction().commit();

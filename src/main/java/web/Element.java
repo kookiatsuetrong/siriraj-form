@@ -11,9 +11,13 @@ public class Element {
 	public String title;
 	public String type;
 	public String placeholder;
+	public int min;
+	public int max;
 	
 	public int getId()       { return id;    }
 	public String getTitle() { return title; }
 	public String getType()  { return type;  }
 	public String getPlaceholder() { return placeholder; }
+	public int getMin()      { return min; }
+	public int getMax()      { return max; }
 }

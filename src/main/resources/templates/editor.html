@@ -26,9 +26,12 @@
 				</#if>
 				<#if e.type == "range">
 					<input type="range"
-						   min="0"
-						   max="10"
+						   min="${e.min !  0}"
+						   max="${e.max ! 10}"
 						   value="0"
+						   title = "Title"
+						   data-toggle="tooltip"
+						   data-placement="top" 
 						   class="form-range" />
 				</#if>
 				<#if e.type == "select">
@@ -52,15 +55,18 @@
 	<script>
 		function addElement(title, type) {
 			var typeClass = ''
+			var option = ''
 			switch (type) {
 				case 'range':
 					typeClass = 'form-range'
+					option = "min='0' max='10' value='0'"
 					break
 
 				default:
 					type = 'text'
 					typeClass = 'form-control'
 			}
+			// TODO: set min max default value from here
 			fetch('/add-element', {
 				method:'post',
 				body: 'form=' + formId + 
@@ -89,7 +95,9 @@
 								</polygon>
 							</svg>
 						</a>
-						<input type='--type--' class='--type-class--' />
+						<input type='--type--' class='--type-class--' 
+								--option--
+						/>
 					</div>`
 					template = template.replace('--name--', title)
 					template = template.replace('--type--', type)
@@ -97,6 +105,7 @@
 					template = template.replace('--type-class--', typeClass)
 					template = template.replace('--element-id--', d.id)
 					template = template.replace('--element-id--', d.id)
+					template = template.replace('--option--', option)
 
 					var form = document.querySelector("#main-form")
 					form.innerHTML += template
@@ -282,6 +291,12 @@
 					<input id="edit-range-modal-title"
 						class="form-control"
 						placeholder="Title" />
+					<input id="edit-range-modal-min"
+						class="form-control"
+						placeholder="Minimum" />
+					<input id="edit-range-modal-max"
+						class="form-control"
+						placeholder="Maximum" />
 					<input id="edit-range-modal-id" type="hidden" />
 				</div>
 				<div class="modal-footer" style="justify-content: space-between;">
@@ -298,6 +313,13 @@
 			var title   = document.querySelector("#edit-range-modal-title")
 			title.focus()
 			title.value = element.firstElementChild.innerText
+			
+			var input = element.firstElementChild.nextElementSibling.nextElementSibling
+			var min     = document.querySelector("#edit-range-modal-min")
+			var max     = document.querySelector("#edit-range-modal-max")
+			min.value = input.min
+			max.value = input.max
+			
 			var id      = document.querySelector("#edit-range-modal-id")
 			id.value = element.getAttribute("element-id")
 			rangeEditorDialog.show()
@@ -312,11 +334,13 @@
 		}
 		rangeEditorOk.onclick = function(e) {
 			var title = document.querySelector("#edit-range-modal-title")
+			var min   = document.querySelector("#edit-range-modal-min")
+			var max   = document.querySelector("#edit-range-modal-max")
 			var id    = document.querySelector("#edit-range-modal-id")
 			
 			fetch('/save-element/' + id.value, {
 				method:'post',
-				body: 'title=' + title.value,
+				body: 'title=' + title.value + '&min=' + min.value + '&max=' + max.value,
 				headers: {
 					'Content-Type': 'application/x-www-form-urlencoded'
 				},
@@ -331,6 +355,10 @@
 				}
 				if (e != null) {
 					element.firstElementChild.innerText = d.title
+					element.firstElementChild.nextElementSibling
+								.nextElementSibling.min = d.min
+					element.firstElementChild.nextElementSibling
+								.nextElementSibling.max = d.max
 				}
 				rangeEditorDialog.hide()
 			})
