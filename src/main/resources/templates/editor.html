@@ -2,36 +2,6 @@
 <div class="container">
 	
 	<form id="main-form">
-		<a class='edit-form' href='javascript:editForm()'>
-			<svg class='big' width="96" height="96" viewBox="0 0 24 24" 
-				fill="none" stroke="#333" stroke-width="2" 
-				stroke-linecap="round" stroke-linejoin="round">
-				<circle cx="12" cy="12" r="3"></circle>
-				<path d="M19.4 15a1.65 1.65 0 0 0 .33 
-						1.82l.06.06a2 2 0 0 1 0 2.83 
-						2 2 0 0 1-2.83 0l-.06-.06a1.65 
-						1.65 0 0 0-1.82-.33 1.65 1.65 
-						0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 
-						0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 
-						19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 
-						2 0 0 1-2.83 0 2 2 0 0 1 
-						0-2.83l.06-.06a1.65 1.65 0 0 0 
-						.33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 
-						2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 
-						1.65 0 0 0 4.6 9a1.65 1.65 0 0 
-						0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 
-						2 2 0 0 1 2.83 0l.06.06a1.65 1.65 
-						0 0 0 1.82.33H9a1.65 1.65 0 0 0 
-						1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 
-						2v.09a1.65 1.65 0 0 0 1 1.51 1.65 
-						1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 
-						1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 
-						1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 
-						1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 
-						2h-.09a1.65 1.65 0 0 0-1.51 1z">
-				</path>
-			</svg>
-		</a>
 		<h1 id='form-title'>${form.title}</h1>
 
 		<#list elements as e>
@@ -52,7 +22,7 @@
 				<#if e.type == "text">
 					<input type="text"
 						   class="form-control"
-						   placeholder="Input Text" />
+						   placeholder="${e.placeholder ! ''}" />
 				</#if>
 				<#if e.type == "range">
 					<input type="range"
@@ -77,6 +47,7 @@
 	<a href="javascript:addElement('New Text', 'text')">Text</a>
 	<a href="javascript:addElement('Data Element', 'range')">Slider</a>
 	<a href="/profile">Home</a>
+	<a href='javascript:editForm()'>Settings</a>
 
 	<script>
 		function addElement(title, type) {
@@ -233,6 +204,9 @@
 					<input id="edit-text-modal-title"
 						class="form-control"
 						placeholder="Title" />
+					<input id="edit-text-modal-placeholder"
+						class="form-control"
+						placeholder="Placeholder" />
 					<input id="edit-text-modal-id" type="hidden" />
 				</div>
 				<div class="modal-footer" style="justify-content: space-between;">
@@ -247,7 +221,12 @@
 	<script>
 		function editText(element) {
 			var title   = document.querySelector("#edit-text-modal-title")
+			title.focus()
 			title.value = element.firstElementChild.innerText
+			
+			var input   = element.firstElementChild.nextElementSibling.nextElementSibling
+			document.querySelector("#edit-text-modal-placeholder").value = input.placeholder
+			
 			var id      = document.querySelector("#edit-text-modal-id")
 			id.value = element.getAttribute("element-id")
 			textEditorDialog.show()
@@ -261,8 +240,100 @@
 			textEditorDialog.hide()
 		}
 		textEditorOk.onclick = function(e) {
-			var title = document.querySelector("#edit-text-modal-title")
-			console.log(title.value)
+			var title       = document.querySelector("#edit-text-modal-title")
+			var placeholder = document.querySelector("#edit-text-modal-placeholder")
+			var id          = document.querySelector("#edit-text-modal-id")
+			
+			fetch('/save-element/' + id.value, {
+				method:'post',
+				body: 'title=' + title.value + '&placeholder=' + placeholder.value,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+			}).then( r => r.json() )
+			.then( d => {
+				var all = document.querySelectorAll("div.element")
+				var element = null
+				for (var i = 0; i < all.length; i++) {
+					if (d.id == all[i].getAttribute('element-id') ) {
+						element = all[i]
+					}
+				}
+				if (element != null) {
+					element.firstElementChild.innerText = d.title
+					element.firstElementChild.nextElementSibling
+							.nextElementSibling.placeholder = d.placeholder
+				}
+				textEditorDialog.hide()
+			})
+		}
+	</script>
+	
+	<div class="modal fade" id="edit-range-modal" data-backdrop="static" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Range</h5>
+					<button type="button" class="close" data-dismiss="modal">
+						<span>&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<input id="edit-range-modal-title"
+						class="form-control"
+						placeholder="Title" />
+					<input id="edit-range-modal-id" type="hidden" />
+				</div>
+				<div class="modal-footer" style="justify-content: space-between;">
+					<button type="button" class="btn btn-danger"
+						id="edit-range-modal-delete">Delete</button>
+					<button type="button" class="btn btn-primary"
+						id="edit-range-modal-ok">Save</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script>
+		function editRange(element) {
+			var title   = document.querySelector("#edit-range-modal-title")
+			title.focus()
+			title.value = element.firstElementChild.innerText
+			var id      = document.querySelector("#edit-range-modal-id")
+			id.value = element.getAttribute("element-id")
+			rangeEditorDialog.show()
+		}
+		var rangeEditorDialog = new bootstrap.Modal(document.querySelector("#edit-range-modal"))
+		var rangeEditorOk = document.querySelector("#edit-range-modal-ok")
+		var rangeEditorDelete = document.querySelector("#edit-range-modal-delete")
+		rangeEditorDelete.onclick = function(e) {
+			var id = document.querySelector("#edit-range-modal-id")
+			removeElement(id.value)
+			rangeEditorDialog.hide()
+		}
+		rangeEditorOk.onclick = function(e) {
+			var title = document.querySelector("#edit-range-modal-title")
+			var id    = document.querySelector("#edit-range-modal-id")
+			
+			fetch('/save-element/' + id.value, {
+				method:'post',
+				body: 'title=' + title.value,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded'
+				},
+			}).then( r => r.json() )
+			.then( d => {
+				var all = document.querySelectorAll("div.element")
+				var element = null
+				for (var i = 0; i < all.length; i++) {
+					if (d.id == all[i].getAttribute('element-id') ) {
+						element = all[i]
+					}
+				}
+				if (e != null) {
+					element.firstElementChild.innerText = d.title
+				}
+				rangeEditorDialog.hide()
+			})
 		}
 	</script>
 
@@ -286,9 +357,6 @@
 	}
 	a:hover > svg {
 		stroke: green;
-	}
-	.edit-form {
-		float: right;
 	}
 	.element {
 		margin-bottom: 1rem;

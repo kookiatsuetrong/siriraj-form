@@ -238,8 +238,9 @@ class Web {
 		}
 	}
 	
+	// TODO: Change to @DeleteMapping
 	@GetMapping("/remove-element/{eid}") @ResponseBody
-	Element addElement(@PathVariable Integer eid, HttpSession session) {
+	Element removeElement(@PathVariable Integer eid, HttpSession session) {
 		Element e = new Element();
 		User user = (User)session.getAttribute("user");
 		if (user == null || eid == null) {
@@ -255,6 +256,36 @@ class Web {
 					manager.getTransaction().begin();
 					manager.remove(t);
 					manager.getTransaction().commit();
+				}
+			} catch (Exception x) { }
+			manager.close();
+			return e;
+		}
+	}
+	
+	@PostMapping("/save-element/{eid}") @ResponseBody
+	Element saveElement(HttpSession session, 
+						@PathVariable Integer eid, 
+						String title, 
+						String placeholder) 
+	{
+		Element e = new Element();
+		User user = (User)session.getAttribute("user");
+		if (user == null || eid == null) {
+			return e;
+		} else {
+			EntityManagerFactory factory = Persistence
+										.createEntityManagerFactory("main");
+			EntityManager manager = factory.createEntityManager();
+			try {
+				Element t = manager.find(Element.class, eid);
+				if (t.form.user.id == user.id) {
+					t.title = title;
+					t.placeholder = placeholder;
+					manager.getTransaction().begin();
+					manager.persist(t);
+					manager.getTransaction().commit();
+					e = t;
 				}
 			} catch (Exception x) { }
 			manager.close();

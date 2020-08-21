@@ -10,13 +10,14 @@
 				<#if e.type == "text">
 					<input type="text"
 						   class="form-control"
-						   placeholder="Input Text" />
+						   placeholder="${e.placeholder ! ''}"  />
 				</#if>
 				<#if e.type == "range">
 					<input type="range"
 						   min="0"
 						   max="10"
 						   value="0"
+						   step
 						   class="form-range" />
 				</#if>
 				<#if e.type == "select">
@@ -37,7 +38,7 @@
 
 <style>
 	form {
-		padding-top: 0.5rem;
+		padding: 0.5rem 0;
 	}
 	.element {
 		margin-bottom: 1rem;

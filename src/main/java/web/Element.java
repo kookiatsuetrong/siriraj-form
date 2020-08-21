@@ -10,8 +10,10 @@ public class Element {
 	public Form form;
 	public String title;
 	public String type;
+	public String placeholder;
 	
 	public int getId()       { return id;    }
 	public String getTitle() { return title; }
 	public String getType()  { return type;  }
+	public String getPlaceholder() { return placeholder; }
 }

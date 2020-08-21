@@ -22,6 +22,11 @@ create table elements(
 	title     varchar(200) not null default '',
 	type      varchar(200) not null
 );
+alter table elements add placeholder varchar(200);
+alter table elements add min int;
+alter table elements add max int;
+alter table elements add value int;
+alter table elements add step int;
 
 insert into users(email,password,full_name)
 	values('user@email.com', sha2('user', 512), 'Administrator');
