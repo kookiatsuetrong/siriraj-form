@@ -12,4 +12,8 @@ public class Value {
     public String value;
 
     public Instant time;
+
+    public Instant getTime()    { return time;    }
+    public String  getValue()   { return value;   }
+    public Element getElement() { return element; }
 }

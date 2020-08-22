@@ -226,6 +226,38 @@ class Web
         }
     }
 
+    @GetMapping("/result/{form}")
+    String showResult(HttpSession session,
+            Model model,
+            @PathVariable Integer form)
+    {
+        User user = (User)session.getAttribute("user");
+        List result = new ArrayList();
+        if (user == null || form == null) {
+            return "redirect:/login";
+        } else {
+            EntityManager manager = Persistence
+                                    .createEntityManagerFactory("main")
+                                    .createEntityManager();
+            try {
+                Form f = manager.find(Form.class, form);
+                if (f.user.id == user.id) {
+                    Query query = manager.createQuery(
+                                            "select v from Value v " +
+                                            "left join v.element e " +
+                                            "left join e.form f    " +
+                                            "where f.id = :fid     " +
+                                            "order by v.time, e.id ");
+                    query.setParameter("fid", form);
+                    result = query.getResultList();
+                }
+            } catch (Exception x) { }
+            model.addAttribute("result", result);
+            manager.close();
+            return "result";
+        }
+    }
+
     @PostMapping("/add-element") @ResponseBody
     Element addElement(HttpSession session,
                     String name,
