@@ -32,7 +32,7 @@
                            class="form-range"
                            oninput="updateRange(this)"
                            onchange="updateRange(this)"/>
-                    <p class="input-value"></p>
+                    <p class="input-value">${e.min ! 0} ... ${e.max ! 10}</p>
                 </#if>
                 <#if e.type == "select">
                     <select class="form-select">
@@ -106,7 +106,7 @@
                     <input type='--type--' class='--type-class--'
                             --option--
                     />
-                    <p style="float:right; margin-top:-3rem;"></p>
+                    <p class="input-value"></p>
                 </div>`
                 template = template.replace('--option--', option)
                 template = template.replace('--name--', title)
