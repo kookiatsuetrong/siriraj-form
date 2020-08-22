@@ -5,7 +5,7 @@
         <h1>${form.title}</h1>
 
         <#list elements as e>
-            <div class='element'>
+            <div class='element' element-id="${e.id}">
                 <label>${e.title}</label>
                 <#if e.type == "text">
                     <input type="text"
@@ -32,36 +32,61 @@
                 </#if>
             </div>
         </#list>
-
-        <button class="btn btn-primary" id="submit-button">Submit</button>
     </form>
-
+    <button class="btn btn-primary" onclick="submit()">Submit</button>
 </div>
 <script>
+var formId = ${form.id}
+
 function updateRange(e) {
     e.setAttribute('value', e.value)
     e.nextElementSibling.innerText = e.value
 }
+function submit() {
+    var data = [ ]
+    var all = document.querySelectorAll('.element')
+    for (var i in all) {
+        var label = all[i].firstElementChild
+        if (label) {
+            var input = all[i].firstElementChild.nextElementSibling
+            var id = all[i].getAttribute("element-id")
+            data.push({id:id, value:input.value})
+        }
+    }
+    console.log(data)
+
+    fetch('/save-data/' + formId, {
+        method: 'post',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({data:data})
+    }).then( r => r.json() )
+    .then(d => {
+        // console.log(d)
+        location.reload()
+    })
+}
 </script>
 
 <style>
-    form {
-        padding: 0.5rem 0;
-    }
-    .element {
-        margin-bottom: 1rem;
-        padding: 0.5rem;
-        background: #f8f8f8;
-        transition: background 0.1s linear;
-        border-left: 2px solid #ccc;
-    }
-    .element:hover {
-        background: #fcfcfc;
-    }
-    .input-value {
-        float:right;
-        margin-top:-3rem;
-        color: #999;
-    }
+form {
+    padding: 0.5rem 0;
+}
+.element {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: #f8f8f8;
+    transition: background 0.1s linear;
+    border-left: 2px solid #ccc;
+}
+.element:hover {
+    background: #fcfcfc;
+}
+.input-value {
+    float:right;
+    margin-top:-3rem;
+    color: #999;
+}
 </style>
 <#include "footer.html">

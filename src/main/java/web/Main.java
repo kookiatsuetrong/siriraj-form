@@ -1,6 +1,7 @@
 package web;
 import java.util.*;
 import java.math.*;
+import java.time.*;
 import java.security.*;
 import javax.persistence.*;
 import javax.servlet.http.*;
@@ -45,9 +46,9 @@ class Web
         ArrayList<Element> result = null;
         Form form = null;
         if (fid != -1) {
-            EntityManagerFactory factory = Persistence
-                                        .createEntityManagerFactory("main");
-            EntityManager manager = factory.createEntityManager();
+            EntityManager manager = Persistence
+                                    .createEntityManagerFactory("main")
+                                    .createEntityManager();
             try {
                 Query query = manager.createQuery(
                                         "select e from Element e " +
@@ -56,9 +57,7 @@ class Web
                 query.setParameter("fid", fid);
                 result = (ArrayList<Element>)query.getResultList();
                 form = manager.find(Form.class, fid);
-            } catch (Exception e) {
-
-            }
+            } catch (Exception e) { }
             manager.close();
         }
 
@@ -86,9 +85,9 @@ class Web
             ArrayList<Element> result = null;
             Form form = null;
             if (fid != -1) {
-                EntityManagerFactory factory = Persistence
-                                            .createEntityManagerFactory("main");
-                EntityManager manager = factory.createEntityManager();
+                EntityManager manager = Persistence
+                                        .createEntityManagerFactory("main")
+                                        .createEntityManager();
                 try {
                     Query query = manager.createQuery(
                                 "select e from Element e " +
@@ -125,9 +124,9 @@ class Web
     @PostMapping("/login")
     String checkPassword(HttpSession session, String email, String password)
     {
-        EntityManagerFactory factory = Persistence
-                                        .createEntityManagerFactory("main");
-        EntityManager manager = factory.createEntityManager();
+        EntityManager manager = Persistence
+                                .createEntityManagerFactory("main")
+                                .createEntityManager();
         boolean passed = false;
         try {
             Query query = manager.createQuery("select u from User u " +
@@ -165,9 +164,9 @@ class Web
             return "redirect:/login";
         }
         ArrayList<Form> forms;
-        EntityManagerFactory factory = Persistence
-                                        .createEntityManagerFactory("main");
-        EntityManager manager = factory.createEntityManager();
+        EntityManager manager = Persistence
+                                .createEntityManagerFactory("main")
+                                .createEntityManager();
         try {
             Query query = manager.createQuery("select f from Form f " +
                                               "left join f.user u   " +
@@ -190,9 +189,9 @@ class Web
         if (user == null) {
             return "redirect:/login";
         } else {
-            EntityManagerFactory factory = Persistence
-                                        .createEntityManagerFactory("main");
-            EntityManager manager = factory.createEntityManager();
+            EntityManager manager = Persistence
+                                    .createEntityManagerFactory("main")
+                                    .createEntityManager();
             Form form = new Form();
             form.title = "New Form";
             form.user = user;
@@ -210,9 +209,9 @@ class Web
         if (user == null || form == null) {
             return "Invalid";
         } else {
-            EntityManagerFactory factory = Persistence
-                                        .createEntityManagerFactory("main");
-            EntityManager manager = factory.createEntityManager();
+            EntityManager manager = Persistence
+                                    .createEntityManagerFactory("main")
+                                    .createEntityManager();
             try {
                 Form f = manager.find(Form.class, form);
                 if (f.user.id == user.id) {
@@ -241,9 +240,9 @@ class Web
         if (user == null || form == null) {
             return e;
         } else {
-            EntityManagerFactory factory = Persistence
-                                        .createEntityManagerFactory("main");
-            EntityManager manager = factory.createEntityManager();
+            EntityManager manager = Persistence
+                                    .createEntityManagerFactory("main")
+                                    .createEntityManager();
             try {
                 Form f = manager.find(Form.class, form);
                 if (f.user.id == user.id) {
@@ -273,9 +272,9 @@ class Web
         if (user == null || eid == null) {
             return e;
         } else {
-            EntityManagerFactory factory = Persistence
-                                        .createEntityManagerFactory("main");
-            EntityManager manager = factory.createEntityManager();
+            EntityManager manager = Persistence
+                                    .createEntityManagerFactory("main")
+                                    .createEntityManager();
             try {
                 Element t = manager.find(Element.class, eid);
                 if (t.form.user.id == user.id) {
@@ -303,9 +302,9 @@ class Web
         if (user == null || eid == null) {
             return e;
         } else {
-            EntityManagerFactory factory = Persistence
-                                        .createEntityManagerFactory("main");
-            EntityManager manager = factory.createEntityManager();
+            EntityManager manager = Persistence
+                                    .createEntityManagerFactory("main")
+                                    .createEntityManager();
             try {
                 Element t = manager.find(Element.class, eid);
                 if (t.form.user.id == user.id) {
@@ -324,17 +323,33 @@ class Web
         }
     }
 
-    /*
-    @PostMapping(value="/save", consumes="application/json") @ResponseBody
-    List saveForm(HttpSession session,
+    @PostMapping(value="/save-data/{fid}", consumes="application/json")
+    @ResponseBody
+    List saveData(HttpSession session,
+                        @PathVariable String fid,
                         @RequestBody Map<String, List<Element>> data) {
         List<Element> all = data.get("data");
-
-        // for each element, change or insert a new one
-
+        Instant time = Instant.now();
+        EntityManager manager = Persistence
+                                .createEntityManagerFactory("main")
+                                .createEntityManager();
+        try {
+            manager.getTransaction().begin();
+            int form = Integer.valueOf(fid);
+            for (Element e : all) {
+                Value v = new Value();
+                v.element = e;
+                v.value   = e.value;
+                v.time    = time;
+                manager.persist(v);
+            }
+            manager.getTransaction().commit();
+        } catch (Exception x) {
+            System.out.println(x);
+        }
+        manager.close();
         return all;
     }
-    */
 
     String encrypt(String data)
     {

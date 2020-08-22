@@ -13,6 +13,7 @@ public class Element {
     public String placeholder;
     public int min;
     public int max;
+    public String value;
 
     public int getId()       { return id;    }
     public String getTitle() { return title; }
@@ -20,4 +21,5 @@ public class Element {
     public String getPlaceholder() { return placeholder; }
     public int getMin()      { return min; }
     public int getMax()      { return max; }
+    public String getValue() { return value; }
 }

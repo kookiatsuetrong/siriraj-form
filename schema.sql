@@ -42,6 +42,9 @@ insert into elements(form_id, title, type)
 insert into elements(form_id, title, type)
     values(1, 'Overall', 'range');
 
-
-insert into users(email,password,full_name)
-values('james@bond.com', sha2('james123', 512), 'James Bond');
+create table form_values(
+    id         int unique not null auto_increment,
+    element_id int not null,
+    value      varchar(200),
+    time       timestamp
+);
