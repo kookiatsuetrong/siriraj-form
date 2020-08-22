@@ -189,7 +189,7 @@ class Web {
 		}
 	}
 
-	@PostMapping("/save-form") @ResponseBody
+	@PutMapping("/save-form") @ResponseBody
 	String saveForm(Integer form, String title, HttpSession session) {
 		User user = (User)session.getAttribute("user");
 		if (user == null || form == null) {
@@ -240,8 +240,7 @@ class Web {
 		}
 	}
 	
-	// TODO: Change to @DeleteMapping
-	@GetMapping("/remove-element/{eid}") @ResponseBody
+	@DeleteMapping("/remove-element/{eid}") @ResponseBody
 	Element removeElement(@PathVariable Integer eid, HttpSession session) {
 		Element e = new Element();
 		User user = (User)session.getAttribute("user");
@@ -265,12 +264,12 @@ class Web {
 		}
 	}
 	
-	@PostMapping("/save-element/{eid}") @ResponseBody
+	@PutMapping("/save-element/{eid}") @ResponseBody
 	Element saveElement(HttpSession session, 
 						@PathVariable Integer eid, 
 						String title, 
 						String placeholder,
-					    Integer min, 
+						Integer min, 
 						Integer max) 
 	{
 		Element e = new Element();
@@ -286,8 +285,8 @@ class Web {
 				if (t.form.user.id == user.id) {
 					t.title = title;
 					t.placeholder = placeholder;
-					t.min = min;
-					t.max = max;
+					if (min != null) { t.min = min; }
+					if (min != null) { t.max = max; }
 					manager.getTransaction().begin();
 					manager.persist(t);
 					manager.getTransaction().commit();

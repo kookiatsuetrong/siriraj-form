@@ -23,8 +23,8 @@ create table elements(
 	type      varchar(200) not null
 );
 alter table elements add placeholder varchar(200);
-alter table elements add min int;
-alter table elements add max int;
+alter table elements add min int default 0;
+alter table elements add max int default 10;
 alter table elements add value int;
 alter table elements add step int;
 
