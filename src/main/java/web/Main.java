@@ -11,26 +11,32 @@ import org.springframework.boot.autoconfigure.*;
 import org.springframework.web.bind.annotation.*;
 
 @SpringBootApplication
-public class Main {
-    public static void main(String[] z) {
+public class Main
+{
+    public static void main(String[] z)
+    {
         SpringApplication.run(Main.class, z);
     }
 }
 
 @Controller
-class Web {
+class Web
+{
     @GetMapping("/")
-    String showHome() {
+    String showHome()
+    {
         return "home";
     }
 
     @GetMapping("/error")
-    String showError() {
+    String showError()
+    {
         return "error";
     }
 
     @GetMapping("/form/{id}")
-    String showForm(Model model, @PathVariable String id) {
+    String showForm(Model model, @PathVariable String id)
+    {
         int fid = -1;
         try {
             fid = Integer.valueOf(id);
@@ -43,9 +49,10 @@ class Web {
                                         .createEntityManagerFactory("main");
             EntityManager manager = factory.createEntityManager();
             try {
-                Query query = manager.createQuery("select e from Element e " +
-                                                  "left join e.form f      " +
-                                                  "where f.id = :fid       ");
+                Query query = manager.createQuery(
+                                        "select e from Element e " +
+                                        "left join e.form f      " +
+                                        "where f.id = :fid       ");
                 query.setParameter("fid", fid);
                 result = (ArrayList<Element>)query.getResultList();
                 form = manager.find(Form.class, fid);
@@ -65,7 +72,8 @@ class Web {
     }
 
     @GetMapping("/edit/{id}")
-    String editForm(HttpSession session, Model model, @PathVariable String id) {
+    String editForm(HttpSession session, Model model, @PathVariable String id)
+    {
         User user = (User)session.getAttribute("user");
         if (user == null) {
             return "redirect:/login";
@@ -82,11 +90,12 @@ class Web {
                                             .createEntityManagerFactory("main");
                 EntityManager manager = factory.createEntityManager();
                 try {
-                    Query query = manager.createQuery("select e from Element e " +
-                                                    "left join e.form f      " +
-                                                    "left join f.user u      " +
-                                                    "where f.id = :fid       " +
-                                                    "and   u.id = :uid       ");
+                    Query query = manager.createQuery(
+                                "select e from Element e " +
+                                "left join e.form f      " +
+                                "left join f.user u      " +
+                                "where f.id = :fid       " +
+                                "and   u.id = :uid       ");
                     query.setParameter("fid", fid);
                     query.setParameter("uid", user.id);
                     result = (ArrayList<Element>)query.getResultList();
@@ -108,12 +117,14 @@ class Web {
     }
 
     @GetMapping("/login")
-    String showLogInPage() {
+    String showLogInPage()
+    {
         return "login";
     }
 
     @PostMapping("/login")
-    String checkPassword(HttpSession session, String email, String password) {
+    String checkPassword(HttpSession session, String email, String password)
+    {
         EntityManagerFactory factory = Persistence
                                         .createEntityManagerFactory("main");
         EntityManager manager = factory.createEntityManager();
@@ -140,13 +151,15 @@ class Web {
     }
 
     @GetMapping("/logout")
-    String showLogOut(HttpSession session) {
+    String showLogOut(HttpSession session)
+    {
         session.removeAttribute("user");
         return "logout";
     }
 
     @GetMapping("/profile")
-    String showProfile(HttpSession session, Model model) {
+    String showProfile(HttpSession session, Model model)
+    {
         User user = (User)session.getAttribute("user");
         if (user == null) {
             return "redirect:/login";
@@ -171,7 +184,8 @@ class Web {
     }
 
     @GetMapping("/add-form")
-    String showAddForm(HttpSession session) {
+    String showAddForm(HttpSession session)
+    {
         User user = (User)session.getAttribute("user");
         if (user == null) {
             return "redirect:/login";
@@ -190,7 +204,8 @@ class Web {
     }
 
     @PutMapping("/save-form") @ResponseBody
-    String saveForm(Integer form, String title, HttpSession session) {
+    String saveForm(HttpSession session, Integer form, String title)
+    {
         User user = (User)session.getAttribute("user");
         if (user == null || form == null) {
             return "Invalid";
@@ -219,7 +234,8 @@ class Web {
                     Integer form,
                     String placeholder,
                     Integer min,
-                    Integer max) {
+                    Integer max)
+    {
         Element e = new Element();
         User user = (User)session.getAttribute("user");
         if (user == null || form == null) {
@@ -250,7 +266,8 @@ class Web {
     }
 
     @DeleteMapping("/remove-element/{eid}") @ResponseBody
-    Element removeElement(@PathVariable Integer eid, HttpSession session) {
+    Element removeElement(HttpSession session, @PathVariable Integer eid)
+    {
         Element e = new Element();
         User user = (User)session.getAttribute("user");
         if (user == null || eid == null) {
@@ -319,7 +336,8 @@ class Web {
     }
     */
 
-    String encrypt(String data) {
+    String encrypt(String data)
+    {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             byte[] b = md.digest(data.getBytes());

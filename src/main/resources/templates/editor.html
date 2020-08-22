@@ -23,16 +23,16 @@
                     <input type="text"
                            class="form-control"
                            placeholder="${e.placeholder ! ''}" />
+                    <p class="input-value"></p>
                 </#if>
                 <#if e.type == "range">
                     <input type="range"
                            min="${e.min !  0}"
                            max="${e.max ! 10}"
-                           value="0"
-                           title = "Title"
-                           data-toggle="tooltip"
-                           data-placement="top"
-                           class="form-range" />
+                           class="form-range"
+                           oninput="updateRange(this)"
+                           onchange="updateRange(this)"/>
+                    <p class="input-value"></p>
                 </#if>
                 <#if e.type == "select">
                     <select class="form-select">
@@ -53,103 +53,109 @@
     <a href="/profile">Home</a>
 
     <script>
-        function addElement(title, type) {
-            var typeClass = ''
-            var option = ''
-            var placeholder = 'Data Element'
-            switch (type) {
-                case 'range':
-                    typeClass = 'form-range'
-                    option = "min='0' max='10' value='0'"
-                    break
+    function updateRange(e) {
+        e.setAttribute('value', e.value)
+        e.nextElementSibling.innerText = e.value
+    }
+    function addElement(title, type) {
+        var typeClass = ''
+        var option = ''
+        var placeholder = 'Data Element'
+        switch (type) {
+            case 'range':
+                typeClass = 'form-range'
+                option = "min='0' max='10' " +
+                         "oninput='updateRange(this)'"
+                break
 
-                default:
-                    type = 'text'
-                    typeClass = 'form-control'
-                    option = "placeholder='" + placeholder + "' "
-            }
-            fetch('/add-element', {
-                method:'post',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'form=' + formId +
-                        '&name=' + title +
-                        '&type=' + type +
-                        '&placeholder=' + placeholder +
-                        '&min=0&max=10'
-                })
-            .then( r => r.json() )
-            .then( d => {
-                console.log(d)
-                if (d.id > 0) {
-                    var template = `<div class='element' element-id='--element-id--'
-                            element-type='--type--'>
-                        <label>--name--</label>
-                        <a href='javascript:editElement(--element-id--)'>
-                            <svg class="normal" width="96" height="96"
-                                viewBox="0 0 24 24" fill="none"
-                                stroke="#333" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2
-                                        2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34">
-                                </path>
-                                <polygon points="18 2 22 6 12 16 8 16 8 12 18 2">
-                                </polygon>
-                            </svg>
-                        </a>
-                        <input type='--type--' class='--type-class--'
-                                --option--
-                        />
-                    </div>`
-                    template = template.replace('--option--', option)
-                    template = template.replace('--name--', title)
-                    template = template.replace('--type--', type)
-                    template = template.replace('--type--', type)
-                    template = template.replace('--type-class--', typeClass)
-                    template = template.replace('--element-id--', d.id)
-                    template = template.replace('--element-id--', d.id)
-
-                    var form = document.querySelector("#main-form")
-                    form.innerHTML += template
-                }
+            default:
+                type = 'text'
+                typeClass = 'form-control'
+                option = "placeholder='" + placeholder + "' "
+        }
+        fetch('/add-element', {
+            method:'post',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'form=' + formId +
+                    '&name=' + title +
+                    '&type=' + type +
+                    '&placeholder=' + placeholder +
+                    '&min=0&max=10'
             })
-        }
+        .then( r => r.json() )
+        .then( d => {
+            if (d.id > 0) {
+                var template = `<div class='element'
+                                     element-id='--element-id--'
+                                     element-type='--type--'>
+                    <label>--name--</label>
+                    <a href='javascript:editElement(--element-id--)'>
+                        <svg class="normal" width="96" height="96"
+                            viewBox="0 0 24 24" fill="none"
+                            stroke="#333" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2
+                                     2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34">
+                            </path>
+                            <polygon points="18 2 22 6 12 16 8 16 8 12 18 2">
+                            </polygon>
+                        </svg>
+                    </a>
+                    <input type='--type--' class='--type-class--'
+                            --option--
+                    />
+                    <p style="float:right; margin-top:-3rem;"></p>
+                </div>`
+                template = template.replace('--option--', option)
+                template = template.replace('--name--', title)
+                template = template.replace('--type--', type)
+                template = template.replace('--type--', type)
+                template = template.replace('--type-class--', typeClass)
+                template = template.replace('--element-id--', d.id)
+                template = template.replace('--element-id--', d.id)
 
-        function removeElement(id) {
-            var all = document.querySelectorAll("div.element")
-            var element = null
-            for (var i = 0; i < all.length; i++) {
-                if (id == all[i].getAttribute('element-id') ) {
-                    element = all[i]
-                }
+                var form = document.querySelector("#main-form")
+                form.innerHTML += template
             }
-            if (element != null) {
-                element.style.display = 'none'
-            }
-            fetch('/remove-element/' + id, { method:'delete' })
-            .then(r => r.json())
-            .then(d => {})
-        }
+        })
+    }
 
-        function editElement(id) {
-            var all = document.querySelectorAll("div.element")
-            var element = null
-            for (var i = 0; i < all.length; i++) {
-                if (id == all[i].getAttribute('element-id') ) {
-                    element = all[i]
-                }
-            }
-            if (element != null) {
-                var type = element.getAttribute("element-type")
-                if (type == 'range') {
-                    editRange(element)
-                }
-                if (type == 'text') {
-                    editText(element)
-                }
+    function removeElement(id) {
+        var all = document.querySelectorAll("div.element")
+        var element = null
+        for (var i = 0; i < all.length; i++) {
+            if (id == all[i].getAttribute('element-id') ) {
+                element = all[i]
             }
         }
+        if (element != null) {
+            element.style.display = 'none'
+        }
+        fetch('/remove-element/' + id, { method:'delete' })
+        .then(r => r.json())
+        .then(d => {})
+    }
+
+    function editElement(id) {
+        var all = document.querySelectorAll("div.element")
+        var element = null
+        for (var i = 0; i < all.length; i++) {
+            if (id == all[i].getAttribute('element-id') ) {
+                element = all[i]
+            }
+        }
+        if (element != null) {
+            var type = element.getAttribute("element-type")
+            if (type == 'range') {
+                editRange(element)
+            }
+            if (type == 'text') {
+                editText(element)
+            }
+        }
+    }
     </script>
 
     <div class="modal fade" id="edit-form-modal" data-backdrop="static" tabindex="-1">
@@ -174,33 +180,33 @@
         </div>
     </div>
     <script>
-        var formId = ${form.id}
-        var formTitle = '${form.title}'
+    var formId = ${form.id}
+    var formTitle = '${form.title}'
 
-        var formEditorDialog = new bootstrap.Modal(document.querySelector("#edit-form-modal"))
-        var formEditorOk = document.querySelector("#edit-form-modal-ok")
+    var formEditorDialog = new bootstrap.Modal(document.querySelector("#edit-form-modal"))
+    var formEditorOk = document.querySelector("#edit-form-modal-ok")
 
-        formEditorOk.onclick = function(e) {
-            var title = document.querySelector("#edit-form-modal-title")
-            fetch('/save-form', {
-                method: 'put',
-                body: 'title=' + title.value + "&form=" + formId,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                }
-            }).then( r => r.text() )
-            .then( d => {
-                formTitle = title.value
-                document.querySelector("#form-title").innerHTML = formTitle
-                formEditorDialog.hide()
-            })
-        }
+    formEditorOk.onclick = function(e) {
+        var title = document.querySelector("#edit-form-modal-title")
+        fetch('/save-form', {
+            method: 'put',
+            body: 'title=' + title.value + "&form=" + formId,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }).then( r => r.text() )
+        .then( d => {
+            formTitle = title.value
+            document.querySelector("#form-title").innerHTML = formTitle
+            formEditorDialog.hide()
+        })
+    }
 
-        function editForm() {
-            var title = document.querySelector("#edit-form-modal-title")
-            title.value = formTitle
-            formEditorDialog.show()
-        }
+    function editForm() {
+        var title = document.querySelector("#edit-form-modal-title")
+        title.value = formTitle
+        formEditorDialog.show()
+    }
     </script>
 
     <div class="modal fade" id="edit-text-modal" data-backdrop="static" tabindex="-1">
@@ -231,55 +237,55 @@
         </div>
     </div>
     <script>
-        function editText(element) {
-            var title   = document.querySelector("#edit-text-modal-title")
-            title.focus()
-            title.value = element.firstElementChild.innerText
+    function editText(element) {
+        var title   = document.querySelector("#edit-text-modal-title")
+        title.focus()
+        title.value = element.firstElementChild.innerText
 
-            var input   = element.firstElementChild.nextElementSibling.nextElementSibling
-            document.querySelector("#edit-text-modal-placeholder").value = input.placeholder
+        var input   = element.firstElementChild.nextElementSibling.nextElementSibling
+        document.querySelector("#edit-text-modal-placeholder").value = input.placeholder
 
-            var id      = document.querySelector("#edit-text-modal-id")
-            id.value = element.getAttribute("element-id")
-            textEditorDialog.show()
-        }
-        var textEditorDialog = new bootstrap.Modal(document.querySelector("#edit-text-modal"))
-        var textEditorOk = document.querySelector("#edit-text-modal-ok")
-        var textEditorDelete = document.querySelector("#edit-text-modal-delete")
-        textEditorDelete.onclick = function(e) {
-            var id = document.querySelector("#edit-text-modal-id")
-            removeElement(id.value)
+        var id      = document.querySelector("#edit-text-modal-id")
+        id.value = element.getAttribute("element-id")
+        textEditorDialog.show()
+    }
+    var textEditorDialog = new bootstrap.Modal(document.querySelector("#edit-text-modal"))
+    var textEditorOk = document.querySelector("#edit-text-modal-ok")
+    var textEditorDelete = document.querySelector("#edit-text-modal-delete")
+    textEditorDelete.onclick = function(e) {
+        var id = document.querySelector("#edit-text-modal-id")
+        removeElement(id.value)
+        textEditorDialog.hide()
+    }
+    textEditorOk.onclick = function(e) {
+        var title       = document.querySelector("#edit-text-modal-title")
+        var placeholder = document.querySelector("#edit-text-modal-placeholder")
+        var id          = document.querySelector("#edit-text-modal-id")
+
+        fetch('/save-element/' + id.value, {
+            method:'put',
+            body: 'title=' + title.value + '&placeholder=' + placeholder.value,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        }).then( r => r.json() )
+        .then( d => {
+            console.log(d)
+            var all = document.querySelectorAll("div.element")
+            var element = null
+            for (var i = 0; i < all.length; i++) {
+                if (d.id == all[i].getAttribute('element-id') ) {
+                    element = all[i]
+                }
+            }
+            if (element != null) {
+                element.firstElementChild.innerText = d.title
+                element.firstElementChild.nextElementSibling
+                        .nextElementSibling.placeholder = d.placeholder
+            }
             textEditorDialog.hide()
-        }
-        textEditorOk.onclick = function(e) {
-            var title       = document.querySelector("#edit-text-modal-title")
-            var placeholder = document.querySelector("#edit-text-modal-placeholder")
-            var id          = document.querySelector("#edit-text-modal-id")
-
-            fetch('/save-element/' + id.value, {
-                method:'put',
-                body: 'title=' + title.value + '&placeholder=' + placeholder.value,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-            }).then( r => r.json() )
-            .then( d => {
-                console.log(d)
-                var all = document.querySelectorAll("div.element")
-                var element = null
-                for (var i = 0; i < all.length; i++) {
-                    if (d.id == all[i].getAttribute('element-id') ) {
-                        element = all[i]
-                    }
-                }
-                if (element != null) {
-                    element.firstElementChild.innerText = d.title
-                    element.firstElementChild.nextElementSibling
-                            .nextElementSibling.placeholder = d.placeholder
-                }
-                textEditorDialog.hide()
-            })
-        }
+        })
+    }
     </script>
 
     <div class="modal fade" id="edit-range-modal" data-backdrop="static" tabindex="-1">
@@ -313,60 +319,64 @@
         </div>
     </div>
     <script>
-        function editRange(element) {
-            var title   = document.querySelector("#edit-range-modal-title")
-            title.focus()
-            title.value = element.firstElementChild.innerText
+    function editRange(element) {
+        var title   = document.querySelector("#edit-range-modal-title")
+        title.focus()
+        title.value = element.firstElementChild.innerText
 
-            var input = element.firstElementChild.nextElementSibling.nextElementSibling
-            var min     = document.querySelector("#edit-range-modal-min")
-            var max     = document.querySelector("#edit-range-modal-max")
-            min.value = input.min
-            max.value = input.max
+        var input = element.firstElementChild.nextElementSibling.nextElementSibling
+        var min     = document.querySelector("#edit-range-modal-min")
+        var max     = document.querySelector("#edit-range-modal-max")
+        min.value = input.min
+        max.value = input.max
 
-            var id      = document.querySelector("#edit-range-modal-id")
-            id.value = element.getAttribute("element-id")
-            rangeEditorDialog.show()
-        }
-        var rangeEditorDialog = new bootstrap.Modal(document.querySelector("#edit-range-modal"))
-        var rangeEditorOk = document.querySelector("#edit-range-modal-ok")
-        var rangeEditorDelete = document.querySelector("#edit-range-modal-delete")
-        rangeEditorDelete.onclick = function(e) {
-            var id = document.querySelector("#edit-range-modal-id")
-            removeElement(id.value)
+        var id      = document.querySelector("#edit-range-modal-id")
+        id.value = element.getAttribute("element-id")
+        rangeEditorDialog.show()
+    }
+    var rangeEditorDialog = new bootstrap.Modal(document.querySelector("#edit-range-modal"))
+    var rangeEditorOk = document.querySelector("#edit-range-modal-ok")
+    var rangeEditorDelete = document.querySelector("#edit-range-modal-delete")
+    rangeEditorDelete.onclick = function(e) {
+        var id = document.querySelector("#edit-range-modal-id")
+        removeElement(id.value)
+        rangeEditorDialog.hide()
+    }
+    rangeEditorOk.onclick = function(e) {
+        var title = document.querySelector("#edit-range-modal-title")
+        var min   = document.querySelector("#edit-range-modal-min")
+        var max   = document.querySelector("#edit-range-modal-max")
+        var id    = document.querySelector("#edit-range-modal-id")
+
+        fetch('/save-element/' + id.value, {
+            method:'put',
+            body: 'title=' + title.value + '&min=' + min.value + '&max=' + max.value,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+        }).then( r => r.json() )
+        .then( d => {
+            var all = document.querySelectorAll("div.element")
+            var element = null
+            for (var i = 0; i < all.length; i++) {
+                if (d.id == all[i].getAttribute('element-id') ) {
+                    element = all[i]
+                }
+            }
+            if (e != null) {
+                element.firstElementChild.innerText = d.title
+                element.firstElementChild.nextElementSibling
+                            .nextElementSibling.setAttribute('value', d.min)
+                element.firstElementChild.nextElementSibling
+                            .nextElementSibling.min = d.min
+                element.firstElementChild.nextElementSibling
+                            .nextElementSibling.max = d.max
+                updateRange(element.firstElementChild.nextElementSibling
+                            .nextElementSibling)
+            }
             rangeEditorDialog.hide()
-        }
-        rangeEditorOk.onclick = function(e) {
-            var title = document.querySelector("#edit-range-modal-title")
-            var min   = document.querySelector("#edit-range-modal-min")
-            var max   = document.querySelector("#edit-range-modal-max")
-            var id    = document.querySelector("#edit-range-modal-id")
-
-            fetch('/save-element/' + id.value, {
-                method:'put',
-                body: 'title=' + title.value + '&min=' + min.value + '&max=' + max.value,
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-            }).then( r => r.json() )
-            .then( d => {
-                var all = document.querySelectorAll("div.element")
-                var element = null
-                for (var i = 0; i < all.length; i++) {
-                    if (d.id == all[i].getAttribute('element-id') ) {
-                        element = all[i]
-                    }
-                }
-                if (e != null) {
-                    element.firstElementChild.innerText = d.title
-                    element.firstElementChild.nextElementSibling
-                                .nextElementSibling.min = d.min
-                    element.firstElementChild.nextElementSibling
-                                .nextElementSibling.max = d.max
-                }
-                rangeEditorDialog.hide()
-            })
-        }
+        })
+    }
     </script>
 
 <style>
@@ -393,11 +403,17 @@
     .element {
         margin-bottom: 1rem;
         padding: 0.5rem;
+        background: #f8f8f8;
         transition: background 0.1s linear;
-        border-right: 2px solid #ccc;
+        border-left: 2px solid #ccc;
     }
     .element:hover {
-        background: #f8f8f8;
+        background: #fcfcfc;
+    }
+    .input-value {
+        float:right;
+        margin-top:-3rem;
+        color: #999;
     }
 </style>
 

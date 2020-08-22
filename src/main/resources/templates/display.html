@@ -11,13 +11,16 @@
                     <input type="text"
                            class="form-control"
                            placeholder="${e.placeholder ! ''}"  />
+                    <p class="input-value"></p>
                 </#if>
                 <#if e.type == "range">
                     <input type="range"
                            min="${e.min !  0}"
                            max="${e.max ! 10}"
-                           value="0"
-                           class="form-range" />
+                           class="form-range"
+                           oninput="updateRange(this)"
+                           onchange="updateRange(this)"/>
+                    <p class="input-value"></p>
                 </#if>
                 <#if e.type == "select">
                     <select class="form-select">
@@ -34,6 +37,12 @@
     </form>
 
 </div>
+<script>
+function updateRange(e) {
+    e.setAttribute('value', e.value)
+    e.nextElementSibling.innerText = e.value
+}
+</script>
 
 <style>
     form {
@@ -41,6 +50,18 @@
     }
     .element {
         margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: #f8f8f8;
+        transition: background 0.1s linear;
+        border-left: 2px solid #ccc;
+    }
+    .element:hover {
+        background: #fcfcfc;
+    }
+    .input-value {
+        float:right;
+        margin-top:-3rem;
+        color: #999;
     }
 </style>
 <#include "footer.html">
