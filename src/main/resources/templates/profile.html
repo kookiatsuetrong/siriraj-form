@@ -1,18 +1,18 @@
 <#include "header.html">
 <div class="container">
-	<h1>Welcome to your profile page</h1>
-	<h4>All of your forms</h4>
-	<#list forms as f>
-		${f.title}
-		<a href="/form/${f.id}">View</a>
-		<a href="/edit/${f.id}">Edit</a>
-		<br/>
-	</#list>
-	
-	<br/>
-	<div class="btn-group">
-		<a href="/add-form" class="btn btn-primary">Add New Form</a>
-		<a href="/logout" class="btn btn-primary">Log Out</a>
-	</div>
+    <h1>Welcome to your profile page</h1>
+    <h4>All of your forms</h4>
+    <#list forms as f>
+        ${f.title}
+        <a href="/form/${f.id}">View</a>
+        <a href="/edit/${f.id}">Edit</a>
+        <br/>
+    </#list>
+
+    <br/>
+    <div class="btn-group">
+        <a href="/add-form" class="btn btn-primary">Add New Form</a>
+        <a href="/logout" class="btn btn-primary">Log Out</a>
+    </div>
 </div>
 <#include "footer.html">
