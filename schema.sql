@@ -27,6 +27,8 @@ alter table elements add min int default 0;
 alter table elements add max int default 10;
 alter table elements add value int;
 alter table elements add step int;
+alter table elements add detail varchar(200);
+alter table elements add status varchar(200) default 'active';
 
 insert into users(email,password,full_name)
     values('user@email.com', sha2('user', 512), 'Administrator');

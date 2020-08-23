@@ -9,8 +9,8 @@ public class Value {
 
     @OneToOne
     public Element element;
-    public String value;
 
+    public String value;
     public Instant time;
 
     public Instant getTime()    { return time;    }

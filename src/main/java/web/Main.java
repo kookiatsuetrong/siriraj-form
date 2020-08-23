@@ -51,9 +51,10 @@ class Web
                                     .createEntityManager();
             try {
                 Query query = manager.createQuery(
-                                        "select e from Element e " +
-                                        "left join e.form f      " +
-                                        "where f.id = :fid       ");
+                                        "select e from Element e   " +
+                                        "left join e.form f        " +
+                                        "where e.status = 'active' " +
+                                        "and f.id = :fid           ");
                 query.setParameter("fid", fid);
                 result = (ArrayList<Element>)query.getResultList();
                 form = manager.find(Form.class, fid);
@@ -90,11 +91,12 @@ class Web
                                         .createEntityManager();
                 try {
                     Query query = manager.createQuery(
-                                "select e from Element e " +
-                                "left join e.form f      " +
-                                "left join f.user u      " +
-                                "where f.id = :fid       " +
-                                "and   u.id = :uid       ");
+                                "select e from Element e   " +
+                                "left join e.form f        " +
+                                "left join f.user u        " +
+                                "where e.status = 'active' " +
+                                "and   f.id = :fid         " +
+                                "and   u.id = :uid         ");
                     query.setParameter("fid", fid);
                     query.setParameter("uid", user.id);
                     result = (ArrayList<Element>)query.getResultList();
@@ -278,12 +280,13 @@ class Web
             try {
                 Form f = manager.find(Form.class, form);
                 if (f.user.id == user.id) {
-                    e.type  = type;
-                    e.title = title;
-                    e.form  = f;
+                    e.type   = type;
+                    e.title  = title;
+                    e.form   = f;
+                    e.status = "active";
                     e.placeholder = placeholder;
-                    e.min   = 0;
-                    e.max   = 10;
+                    e.min    = 0;
+                    e.max    = 10;
                     if (min != null) { e.min = min; }
                     if (max != null) { e.max = max; }
                     manager.getTransaction().begin();
@@ -310,8 +313,10 @@ class Web
             try {
                 Element t = manager.find(Element.class, eid);
                 if (t.form.user.id == user.id) {
+                    t.status = "deleted";
                     manager.getTransaction().begin();
-                    manager.remove(t);
+                    // manager.remove(t);
+                    manager.persist(t);
                     manager.getTransaction().commit();
                     e = t;
                 }

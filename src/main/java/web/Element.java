@@ -14,6 +14,8 @@ public class Element {
     public int min;
     public int max;
     public String value;
+    public String detail;
+    public String status;
 
     public int getId()       { return id;    }
     public String getTitle() { return title; }
