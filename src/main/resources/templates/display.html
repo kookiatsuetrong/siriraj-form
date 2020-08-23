@@ -4,16 +4,18 @@
         <#if user??>
             <a href="/profile" style="float:right;margin-top:.25rem;">Home</a>
         </#if>
-        <h1>${form.title}</h1>
+        <h2>${form.title}</h2>
 
         <#list elements as e>
-            <div class='element' element-id="${e.id}">
+            <div class='element'
+                 element-id="${e.id}"
+                 element-type="${e.type}"
+                 element-detail="${e.placeholder ! ''}">
                 <label>${e.title}</label>
                 <#if e.type == "text">
                     <input type="text"
                            class="form-control"
                            placeholder="${e.placeholder ! ''}"  />
-                    <p class="input-value"></p>
                 </#if>
                 <#if e.type == "range">
                     <input type="range"
@@ -24,31 +26,25 @@
                            onchange="updateRange(this)"/>
                     <p class="input-value">${e.min ! 0} ... ${e.max ! 10}</p>
                 </#if>
-                <#if e.type == "select">
-                    <select class="form-select">
-                        <option>Option</option>
-                        <option>Item 1</option>
-                        <option>Item 2</option>
-                        <option>Item 3</option>
-                    </select>
-                </#if>
                 <#if e.type == "radio">
-                    <#assign id=e.id                      />
-                    <#assign items=e.placeholder          />
-                    <#assign index=0                      />
-                    <#list items?split("\n") as item       >
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               type="radio"
-                               name="${id}"
-                               id="${id}-${index}"
-                               value="${item}" />
-                        <label class="form-check-label"
-                               for="${id}-${index}"
-                                >${item}</label>
+                    <div class="radio-choice">
+                        <#assign id=e.id                      />
+                        <#assign items=e.placeholder          />
+                        <#assign index=0                      />
+                        <#list items?split("\n") as item       >
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="${id}"
+                                   id="${id}-${index}"
+                                   value="${item}" />
+                            <label class="form-check-label"
+                                   for="${id}-${index}"
+                                    >${item}</label>
+                        </div>
+                        <#assign index=index+1                />
+                        </#list>
                     </div>
-                    <#assign index=index+1                />
-                    </#list>
                 </#if>
             </div>
         </#list>
@@ -64,18 +60,27 @@ function updateRange(e) {
     e.nextElementSibling.innerText = e.value
 }
 function submit() {
+    var main = document.querySelector('#main-form')
     var data = [ ]
     var all = document.querySelectorAll('.element')
     for (var i in all) {
-        var label = all[i].firstElementChild
-        if (label) {
-            var input = all[i].firstElementChild.nextElementSibling
-            var id = all[i].getAttribute("element-id")
-            data.push({id:id, value:input.value})
+        if (all[i].getAttribute) {
+            var id    = all[i].getAttribute("element-id")
+            var type  = all[i].getAttribute('element-type')
+            var label = all[i].firstElementChild
+            if (label) {
+                if (type == 'text' || type == 'range') {
+                    var input = all[i].firstElementChild.nextElementSibling
+                    data.push({id:id, value:input.value})
+                }
+                if (type == 'radio') {
+                    var selector = 'input[name="' + id + '"]:checked'
+                    var value = document.querySelector(selector).value
+                    data.push({id:id, value:value})
+                }
+            }
         }
     }
-    console.log(data)
-
     fetch('/save-data/' + formId, {
         method: 'post',
         headers: {
@@ -84,7 +89,6 @@ function submit() {
         body: JSON.stringify({data:data})
     }).then( r => r.json() )
     .then(d => {
-        // console.log(d)
         location.reload()
     })
 }

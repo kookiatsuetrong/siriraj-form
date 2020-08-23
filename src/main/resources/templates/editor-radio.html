@@ -1,0 +1,103 @@
+<div class="modal fade" id="edit-radio-modal" data-backdrop="static" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Options</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="edit-radio-modal-title"
+                    class="form-control"
+                    placeholder="Title" />
+                <textarea class="form-control"
+                    id="edit-radio-modal-detail"
+                    rows="5"
+                ></textarea>
+                <input id="edit-radio-modal-id" type="hidden" />
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn btn-danger"
+                    id="edit-radio-modal-delete">Delete</button>
+                <button type="button" class="btn btn-primary"
+                    id="edit-radio-modal-ok">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editRadio(element) {
+    var title   = document.querySelector("#edit-radio-modal-title")
+    title.focus()
+    title.value = element.firstElementChild.innerText
+    var id      = document.querySelector("#edit-radio-modal-id")
+    id.value    = element.getAttribute("element-id")
+    var detail  = document.querySelector("#edit-radio-modal-detail")
+    detail.value = element.getAttribute("element-detail")
+    radioEditorDialog.show()
+}
+var radioEditorDialog = new bootstrap.Modal(document.querySelector("#edit-radio-modal"))
+var radioEditorOk = document.querySelector("#edit-radio-modal-ok")
+var radioEditorDelete = document.querySelector("#edit-radio-modal-delete")
+radioEditorDelete.onclick = function(e) {
+    var id = document.querySelector("#edit-radio-modal-id")
+    removeElement(id.value)
+    radioEditorDialog.hide()
+}
+radioEditorOk.onclick = function(e) {
+    var title  = document.querySelector("#edit-radio-modal-title")
+    var detail = document.querySelector("#edit-radio-modal-detail")
+    var id     = document.querySelector("#edit-radio-modal-id")
+
+    fetch('/save-element/' + id.value, {
+        method:'put',
+        body: 'title=' + title.value + '&placeholder=' + detail.value,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+    }).then( r => r.json() )
+    .then( d => {
+        console.log(d)
+        var all = document.querySelectorAll("div.element")
+        var element = null
+        for (var i = 0; i < all.length; i++) {
+            if (d.id == all[i].getAttribute('element-id') ) {
+                element = all[i]
+            }
+        }
+        if (element != null) {
+            element.firstElementChild.innerText = d.title
+            element.setAttribute("element-detail", d.placeholder)
+            var index = 0
+            var s = ''
+            for (var value of d.placeholder.split('\n')) {
+                var t = `
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="radio"
+                                   name="--id--"
+                                   id="--id-----index--"
+                                   value="--value--" />
+                            <label class="form-check-label"
+                                   for="--id-----index--"
+                                    >--value--</label>
+                        </div>`
+                t = t.replace('--id--', d.id)
+                t = t.replace('--id--', d.id)
+                t = t.replace('--id--', d.id)
+                t = t.replace('--index--', index)
+                t = t.replace('--index--', index)
+                t = t.replace('--value--', value)
+                t = t.replace('--value--', value)
+                s += t
+                index++
+            }
+            element.firstElementChild.nextElementSibling
+                .nextElementSibling.innerHTML = s
+        }
+        radioEditorDialog.hide()
+    })
+}
+</script>

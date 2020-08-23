@@ -4,7 +4,7 @@
     <br/>
     <#list result as r>
         ${r.time} /
-        ${r.value}
+        ${r.value ! ''}
         <br/>
     </#list>
 </div>

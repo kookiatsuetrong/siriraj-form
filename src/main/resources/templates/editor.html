@@ -1,101 +1,144 @@
 <#include "header.html">
+
 <div class="container">
-
+    <a href="/profile" style="float:right;margin-top:.25rem;">Home</a>
+    <h2 id='form-title'>${form.title}</h2>
     <form id="main-form">
-        <a href="/profile" style="float:right;margin-top:.25rem;">Home</a>
-        <h1 id='form-title'>${form.title}</h1>
-
         <#list elements as e>
-            <div class='element' element-id="${e.id}" element-type="${e.type}"
-                                 element-detail="${e.placeholder ! ''}">
+            <div class='element'
+                 element-id="${e.id}"
+                 element-type="${e.type}"
+                 element-detail="${e.placeholder ! ''}">
+
                 <label>${e.title}</label>
-                <a href='javascript:editElement(${e.id})'>
-                    <svg class="normal" width="96" height="96"
-                        viewBox="0 0 24 24" fill="none"
-                        stroke="#333" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2
-                                2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34">
-                        </path>
-                        <polygon points="18 2 22 6 12 16 8 16 8 12 18 2">
-                        </polygon>
-                    </svg>
-                </a>
+                <a onclick='editElement(${e.id})' class='editor'>&nbsp;</a>
+
                 <#if e.type == "text">
-                    <input type="text"
-                           class="form-control"
-                           placeholder="${e.placeholder ! ''}" />
-                    <p class="input-value"></p>
+                <input type="text"
+                       class="form-control"
+                       placeholder="${e.placeholder ! ''}" />
                 </#if>
                 <#if e.type == "range">
-                    <input type="range"
-                           min="${e.min !  0}"
-                           max="${e.max ! 10}"
-                           class="form-range"
-                           oninput="updateRange(this)"
-                           onchange="updateRange(this)"/>
-                    <p class="input-value">${e.min ! 0} ... ${e.max ! 10}</p>
-                </#if>
-                <#if e.type == "select">
-                    <select class="form-select">
-                        <option>Option</option>
-                        <option>Item 1</option>
-                        <option>Item 2</option>
-                        <option>Item 3</option>
-                    </select>
+                <input type="range"
+                       min="${e.min !  0}"
+                       max="${e.max ! 10}"
+                       class="form-range"
+                       oninput="updateRange(this)" />
+                <p class="input-value">${e.min ! 0} ... ${e.max ! 10}</p>
                 </#if>
                 <#if e.type == "radio">
-                    <div class="radio-choice">
-                        <#assign id=e.id                      />
-                        <#assign items=e.placeholder          />
-                        <#assign index=0                      />
-                        <#list items?split("\n") as item       >
-                        <div class="form-check">
-                            <input class="form-check-input"
-                                   type="radio"
-                                   name="${id}"
-                                   id="${id}-${index}"
-                                   value="${item}" />
-                            <label class="form-check-label"
-                                   for="${id}-${index}"
-                                    >${item}</label>
-                        </div>
-                        <#assign index=index+1                />
-                        </#list>
+                <div class="radio-choice">
+                    <#assign id=e.id                      />
+                    <#assign items=e.placeholder          />
+                    <#assign index=0                      />
+                    <#list items?split("\n") as item       >
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="${id}"
+                               id="${id}-${index}"
+                               value="${item}" />
+                        <label class="form-check-label"
+                               for="${id}-${index}"
+                                >${item}</label>
                     </div>
+                    <#assign index=index+1                />
+                    </#list>
+                </div>
                 </#if>
             </div>
         </#list>
-
     </form>
 
-    <a href="javascript:addElement('Data Field', 'text')">Text</a>
-    <a href="javascript:addElement('Data Range', 'range')">Slider</a>
-    <a href='javascript:editForm()'>Settings</a>
+    <a onclick="addElement('Data Field', 'text')">Text</a>
+    <a onclick="addElement('Data Range', 'range')">Slider</a>
+    <a onclick="addElement('Options', 'radio')">Options</a>
+    <a onclick="editForm()">Settings</a>
 </div>
 
 <script>
+var formId = ${form.id}
+var formTitle = '${form.title}'
 function updateRange(e) {
     e.setAttribute('value', e.value)
     e.nextElementSibling.innerText = e.value
 }
+</script>
+
+<style>
+a.editor {
+    opacity: 0.25;
+}
+a {
+    opacity: 0.75;
+    transition: opacity 0.1s linear;
+}
+a:hover {
+    opacity: 1.0;
+    cursor: pointer;
+}
+.editor {
+    display: inline-block;
+    background-image: url('/edit.svg');
+    width: 1.5rem;
+    height: 1.5rem;
+    opacity: 0.5;
+    transition: opacity 1s linear;
+}
+.editor:hover {
+    opacity: 1;
+}
+.modal-body > * {
+    margin-bottom: 0.5rem;
+}
+form {
+    padding-top: 0.5rem;
+}
+.element {
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: #f8f8f8;
+    transition: background 0.1s linear;
+    border-left: 2px solid #ccc;
+}
+.element:hover {
+    background: #fcfcfc;
+}
+.input-value {
+    float:right;
+    margin-top:-3rem;
+    color: #999;
+}
+</style>
+
+<script>
+function replace(s, p, x) {
+    while (s.indexOf(p) >= 0) {
+        s = s.replace(p, x)
+    }
+    return s
+}
 function addElement(title, type) {
-    var typeClass = ''
+    var className = ''
     var option = ''
     var placeholder = 'Additional Information'
+    var detail = ''
+
     switch (type) {
         case 'range':
-            typeClass = 'form-range'
+            className = 'form-range'
             option = "min='0' max='10' " +
                      "oninput='updateRange(this)'"
             break
-        case 'radio':
 
+        case 'radio':
+            detail = 'Item A\nItem B\nItem C'
+            placeholder = detail
             break;
 
         default:
             type = 'text'
-            typeClass = 'form-control'
+            className = 'form-control'
             option = "placeholder='" + placeholder + "' "
     }
     fetch('/add-element', {
@@ -104,7 +147,7 @@ function addElement(title, type) {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: 'form=' + formId +
-                '&name=' + title +
+                '&title=' + title +
                 '&type=' + type +
                 '&placeholder=' + placeholder +
                 '&min=0&max=10'
@@ -114,32 +157,52 @@ function addElement(title, type) {
         if (d.id > 0) {
             var template = `<div class='element'
                                  element-id='--element-id--'
-                                 element-type='--type--'>
-                <label>--name--</label>
-                <a href='javascript:editElement(--element-id--)'>
-                    <svg class="normal" width="96" height="96"
-                        viewBox="0 0 24 24" fill="none"
-                        stroke="#333" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2
-                                 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34">
-                        </path>
-                        <polygon points="18 2 22 6 12 16 8 16 8 12 18 2">
-                        </polygon>
-                    </svg>
-                </a>
-                <input type='--type--' class='--type-class--'
-                        --option--
-                />
-                <p class="input-value"></p>
-            </div>`
-            template = template.replace('--option--', option)
-            template = template.replace('--name--', title)
-            template = template.replace('--type--', type)
-            template = template.replace('--type--', type)
-            template = template.replace('--type-class--', typeClass)
-            template = template.replace('--element-id--', d.id)
-            template = template.replace('--element-id--', d.id)
+                                 element-type='--type--'
+                                 element-detail='--detail--'>
+                <label>--title--</label>
+                <a href='javascript:editElement(--element-id--)'
+                   class='editor'>&nbsp;</a>`
+
+            if (type == 'radio') {
+                var radio = ''
+                var index = 0
+                for (var value of detail.split('\n')) {
+                    var t = `
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="--id--"
+                                       id="--id-----index--"
+                                       value="--value--" />
+                                <label class="form-check-label"
+                                       for="--id-----index--"
+                                       >--value--</label>
+                            </div>`
+                    t = replace(t, '--id--', d.id)
+                    t = replace(t, '--index--', index)
+                    t = replace(t, '--value--', value)
+                    radio += t
+                    index++
+                }
+                radio = `<div class="radio-choice">` + radio + `</div>`
+                template += radio
+            }
+            if (type == 'text' || type == 'range'){
+                template += `<input type='--type--' class='--class-name--'
+                                        --option--
+                             />`
+            }
+            if (type == 'range') {
+                template += `<p class="input-value">0 ... 10</p>`
+            }
+            template += "</div>"
+
+            template = replace(template, '--option--',     option)
+            template = replace(template, '--title--',      title)
+            template = replace(template, '--detail--',     detail)
+            template = replace(template, '--type--',       type)
+            template = replace(template, '--class-name--', className)
+            template = replace(template, '--element-id--', d.id)
 
             var form = document.querySelector("#main-form")
             form.innerHTML += template
@@ -186,366 +249,9 @@ function editElement(id) {
 }
 </script>
 
-<div class="modal fade" id="edit-form-modal" data-backdrop="static" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Form Editor</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <input id="edit-form-modal-title"
-                    class="form-control"
-                    placeholder="Form Title" />
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary"
-                    id="edit-form-modal-ok">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-var formId = ${form.id}
-var formTitle = '${form.title}'
-
-var formEditorDialog = new bootstrap.Modal(document.querySelector("#edit-form-modal"))
-var formEditorOk = document.querySelector("#edit-form-modal-ok")
-
-formEditorOk.onclick = function(e) {
-    var title = document.querySelector("#edit-form-modal-title")
-    fetch('/save-form', {
-        method: 'put',
-        body: 'title=' + title.value + "&form=" + formId,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        }
-    }).then( r => r.text() )
-    .then( d => {
-        formTitle = title.value
-        document.querySelector("#form-title").innerHTML = formTitle
-        formEditorDialog.hide()
-    })
-}
-
-function editForm() {
-    var title = document.querySelector("#edit-form-modal-title")
-    title.value = formTitle
-    formEditorDialog.show()
-}
-</script>
-
-<div class="modal fade" id="edit-text-modal" data-backdrop="static" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Text</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <input id="edit-text-modal-title"
-                    class="form-control"
-                    placeholder="Title" />
-                <input id="edit-text-modal-placeholder"
-                    class="form-control"
-                    placeholder="Placeholder" />
-                <input id="edit-text-modal-id" type="hidden" />
-            </div>
-            <div class="modal-footer" style="justify-content: space-between;">
-                <button type="button" class="btn btn-danger"
-                    id="edit-text-modal-delete">Delete</button>
-                <button type="button" class="btn btn-primary"
-                    id="edit-text-modal-ok">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-function editText(element) {
-    var title   = document.querySelector("#edit-text-modal-title")
-    title.focus()
-    title.value = element.firstElementChild.innerText
-
-    var input   = element.firstElementChild.nextElementSibling.nextElementSibling
-    document.querySelector("#edit-text-modal-placeholder").value = input.placeholder
-
-    var id      = document.querySelector("#edit-text-modal-id")
-    id.value = element.getAttribute("element-id")
-    textEditorDialog.show()
-}
-var textEditorDialog = new bootstrap.Modal(document.querySelector("#edit-text-modal"))
-var textEditorOk = document.querySelector("#edit-text-modal-ok")
-var textEditorDelete = document.querySelector("#edit-text-modal-delete")
-textEditorDelete.onclick = function(e) {
-    var id = document.querySelector("#edit-text-modal-id")
-    removeElement(id.value)
-    textEditorDialog.hide()
-}
-textEditorOk.onclick = function(e) {
-    var title       = document.querySelector("#edit-text-modal-title")
-    var placeholder = document.querySelector("#edit-text-modal-placeholder")
-    var id          = document.querySelector("#edit-text-modal-id")
-
-    fetch('/save-element/' + id.value, {
-        method:'put',
-        body: 'title=' + title.value + '&placeholder=' + placeholder.value,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-    }).then( r => r.json() )
-    .then( d => {
-        console.log(d)
-        var all = document.querySelectorAll("div.element")
-        var element = null
-        for (var i = 0; i < all.length; i++) {
-            if (d.id == all[i].getAttribute('element-id') ) {
-                element = all[i]
-            }
-        }
-        if (element != null) {
-            element.firstElementChild.innerText = d.title
-            element.firstElementChild.nextElementSibling
-                    .nextElementSibling.placeholder = d.placeholder
-        }
-        textEditorDialog.hide()
-    })
-}
-</script>
-
-<div class="modal fade" id="edit-range-modal" data-backdrop="static" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Range</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <input id="edit-range-modal-title"
-                    class="form-control"
-                    placeholder="Title" />
-                <input id="edit-range-modal-min"
-                    class="form-control"
-                    placeholder="Minimum" />
-                <input id="edit-range-modal-max"
-                    class="form-control"
-                    placeholder="Maximum" />
-                <input id="edit-range-modal-id" type="hidden" />
-            </div>
-            <div class="modal-footer" style="justify-content: space-between;">
-                <button type="button" class="btn btn-danger"
-                    id="edit-range-modal-delete">Delete</button>
-                <button type="button" class="btn btn-primary"
-                    id="edit-range-modal-ok">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-function editRange(element) {
-    var title   = document.querySelector("#edit-range-modal-title")
-    title.focus()
-    title.value = element.firstElementChild.innerText
-
-    var input = element.firstElementChild.nextElementSibling.nextElementSibling
-    var min     = document.querySelector("#edit-range-modal-min")
-    var max     = document.querySelector("#edit-range-modal-max")
-    min.value = input.min
-    max.value = input.max
-
-    var id      = document.querySelector("#edit-range-modal-id")
-    id.value = element.getAttribute("element-id")
-    rangeEditorDialog.show()
-}
-var rangeEditorDialog = new bootstrap.Modal(document.querySelector("#edit-range-modal"))
-var rangeEditorOk = document.querySelector("#edit-range-modal-ok")
-var rangeEditorDelete = document.querySelector("#edit-range-modal-delete")
-rangeEditorDelete.onclick = function(e) {
-    var id = document.querySelector("#edit-range-modal-id")
-    removeElement(id.value)
-    rangeEditorDialog.hide()
-}
-rangeEditorOk.onclick = function(e) {
-    var title = document.querySelector("#edit-range-modal-title")
-    var min   = document.querySelector("#edit-range-modal-min")
-    var max   = document.querySelector("#edit-range-modal-max")
-    var id    = document.querySelector("#edit-range-modal-id")
-
-    fetch('/save-element/' + id.value, {
-        method:'put',
-        body: 'title=' + title.value + '&min=' + min.value + '&max=' + max.value,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-    }).then( r => r.json() )
-    .then( d => {
-        var all = document.querySelectorAll("div.element")
-        var element = null
-        for (var i = 0; i < all.length; i++) {
-            if (d.id == all[i].getAttribute('element-id') ) {
-                element = all[i]
-            }
-        }
-        if (e != null) {
-            element.firstElementChild.innerText = d.title
-            element.firstElementChild.nextElementSibling
-                        .nextElementSibling.setAttribute('value', d.min)
-            element.firstElementChild.nextElementSibling
-                        .nextElementSibling.min = d.min
-            element.firstElementChild.nextElementSibling
-                        .nextElementSibling.max = d.max
-            updateRange(element.firstElementChild.nextElementSibling
-                        .nextElementSibling)
-        }
-        rangeEditorDialog.hide()
-    })
-}
-</script>
-
-<div class="modal fade" id="edit-radio-modal" data-backdrop="static" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Options</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <input id="edit-radio-modal-title"
-                    class="form-control"
-                    placeholder="Title" />
-                <textarea class="form-control"
-                    id="edit-radio-modal-detail"
-                    rows="5"
-                ></textarea>
-                <input id="edit-radio-modal-id" type="hidden" />
-            </div>
-            <div class="modal-footer" style="justify-content: space-between;">
-                <button type="button" class="btn btn-danger"
-                    id="edit-radio-modal-delete">Delete</button>
-                <button type="button" class="btn btn-primary"
-                    id="edit-radio-modal-ok">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-<script>
-function editRadio(element) {
-    var title   = document.querySelector("#edit-radio-modal-title")
-    title.focus()
-    title.value = element.firstElementChild.innerText
-    var id      = document.querySelector("#edit-radio-modal-id")
-    id.value    = element.getAttribute("element-id")
-    var detail  = document.querySelector("#edit-radio-modal-detail")
-    detail.value = element.getAttribute("element-detail")
-    radioEditorDialog.show()
-}
-var radioEditorDialog = new bootstrap.Modal(document.querySelector("#edit-radio-modal"))
-var radioEditorOk = document.querySelector("#edit-radio-modal-ok")
-var radioEditorDelete = document.querySelector("#edit-radio-modal-delete")
-radioEditorDelete.onclick = function(e) {
-    var id = document.querySelector("#edit-radio-modal-id")
-    removeElement(id.value)
-    radioEditorDialog.hide()
-}
-radioEditorOk.onclick = function(e) {
-    var title  = document.querySelector("#edit-radio-modal-title")
-    var detail = document.querySelector("#edit-radio-modal-detail")
-    var id     = document.querySelector("#edit-radio-modal-id")
-
-    fetch('/save-element/' + id.value, {
-        method:'put',
-        body: 'title=' + title.value + '&placeholder=' + detail.value,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-    }).then( r => r.json() )
-    .then( d => {
-        console.log(d)
-        var all = document.querySelectorAll("div.element")
-        var element = null
-        for (var i = 0; i < all.length; i++) {
-            if (d.id == all[i].getAttribute('element-id') ) {
-                element = all[i]
-            }
-        }
-        if (element != null) {
-            element.firstElementChild.innerText = d.title
-            element.setAttribute("element-detail", d.placeholder)
-            var index = 0
-            var s = ''
-            for (var value of d.placeholder.split('\n')) {
-                var t = `
-                        <div class="form-check">
-                            <input class="form-check-input"
-                                   type="radio"
-                                   name="--id--"
-                                   id="--id-----index--"
-                                   value="--value--" />
-                            <label class="form-check-label"
-                                   for="--id-----index--"
-                                    >--value--</label>
-                        </div>`
-                t = t.replace('--id--', d.id)
-                t = t.replace('--id--', d.id)
-                t = t.replace('--id--', d.id)
-                t = t.replace('--index--', index)
-                t = t.replace('--index--', index)
-                t = t.replace('--value--', value)
-                t = t.replace('--value--', value)
-                s += t
-                index++
-            }
-            element.firstElementChild.nextElementSibling
-                .nextElementSibling.innerHTML = s
-        }
-        radioEditorDialog.hide()
-    })
-}
-</script>
-
-<style>
-.modal-body > * {
-    margin-bottom: 0.5rem;
-}
-form {
-    padding-top: 0.5rem;
-}
-svg.big {
-    width: 2rem;
-    height: 2rem;
-}
-svg.normal {
-    width: 1rem;
-    height: 1rem;
-}
-a > svg.normal {
-    margin-top: -0.4rem;
-}
-a:hover > svg {
-    stroke: green;
-}
-.element {
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    background: #f8f8f8;
-    transition: background 0.1s linear;
-    border-left: 2px solid #ccc;
-}
-.element:hover {
-    background: #fcfcfc;
-}
-.input-value {
-    float:right;
-    margin-top:-3rem;
-    color: #999;
-}
-</style>
+<#include "editor-form.html">
+<#include "editor-text.html">
+<#include "editor-range.html">
+<#include "editor-radio.html">
 
 <#include "footer.html">

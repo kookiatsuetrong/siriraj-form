@@ -1,0 +1,49 @@
+<div class="modal fade" id="edit-form-modal" data-backdrop="static" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Form Editor</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="edit-form-modal-title"
+                    class="form-control"
+                    placeholder="Form Title" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary"
+                    id="edit-form-modal-ok">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var formEditorDialog = new bootstrap.Modal(document.querySelector("#edit-form-modal"))
+var formEditorOk = document.querySelector("#edit-form-modal-ok")
+
+formEditorOk.onclick = function(e) {
+    var title = document.querySelector("#edit-form-modal-title")
+    fetch('/save-form', {
+        method: 'put',
+        body: 'title=' + title.value + "&form=" + formId,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    }).then( r => r.text() )
+    .then( d => {
+        formTitle = title.value
+        document.querySelector("#form-title").innerHTML = formTitle
+        console.log(d)
+        formEditorDialog.hide()
+    })
+}
+
+function editForm() {
+    var title = document.querySelector("#edit-form-modal-title")
+    title.value = formTitle
+    formEditorDialog.show()
+}
+</script>

@@ -260,7 +260,7 @@ class Web
 
     @PostMapping("/add-element") @ResponseBody
     Element addElement(HttpSession session,
-                    String name,
+                    String title,
                     String type,
                     Integer form,
                     String placeholder,
@@ -279,7 +279,7 @@ class Web
                 Form f = manager.find(Form.class, form);
                 if (f.user.id == user.id) {
                     e.type  = type;
-                    e.title = name;
+                    e.title = title;
                     e.form  = f;
                     e.placeholder = placeholder;
                     e.min   = 0;

@@ -1,0 +1,92 @@
+<div class="modal fade" id="edit-range-modal" data-backdrop="static" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Range</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="edit-range-modal-title"
+                    class="form-control"
+                    placeholder="Title" />
+                <input id="edit-range-modal-min"
+                    class="form-control"
+                    placeholder="Minimum" />
+                <input id="edit-range-modal-max"
+                    class="form-control"
+                    placeholder="Maximum" />
+                <input id="edit-range-modal-id" type="hidden" />
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn btn-danger"
+                    id="edit-range-modal-delete">Delete</button>
+                <button type="button" class="btn btn-primary"
+                    id="edit-range-modal-ok">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editRange(element) {
+    var title   = document.querySelector("#edit-range-modal-title")
+    title.focus()
+    title.value = element.firstElementChild.innerText
+
+    var input = element.firstElementChild.nextElementSibling.nextElementSibling
+    var min     = document.querySelector("#edit-range-modal-min")
+    var max     = document.querySelector("#edit-range-modal-max")
+    min.value = input.min
+    max.value = input.max
+
+    var id      = document.querySelector("#edit-range-modal-id")
+    id.value = element.getAttribute("element-id")
+    rangeEditorDialog.show()
+}
+var rangeEditorDialog = new bootstrap.Modal(document.querySelector("#edit-range-modal"))
+var rangeEditorOk = document.querySelector("#edit-range-modal-ok")
+var rangeEditorDelete = document.querySelector("#edit-range-modal-delete")
+rangeEditorDelete.onclick = function(e) {
+    var id = document.querySelector("#edit-range-modal-id")
+    removeElement(id.value)
+    rangeEditorDialog.hide()
+}
+rangeEditorOk.onclick = function(e) {
+    var title = document.querySelector("#edit-range-modal-title")
+    var min   = document.querySelector("#edit-range-modal-min")
+    var max   = document.querySelector("#edit-range-modal-max")
+    var id    = document.querySelector("#edit-range-modal-id")
+
+    fetch('/save-element/' + id.value, {
+        method:'put',
+        body: 'title=' + title.value + '&min=' + min.value + '&max=' + max.value,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+    }).then( r => r.json() )
+    .then( d => {
+        var all = document.querySelectorAll("div.element")
+        var element = null
+        for (var i = 0; i < all.length; i++) {
+            if (d.id == all[i].getAttribute('element-id') ) {
+                element = all[i]
+            }
+        }
+        if (e != null) {
+            element.firstElementChild.innerText = d.title
+            element.firstElementChild.nextElementSibling
+                        .nextElementSibling.setAttribute('value', d.min)
+            element.firstElementChild.nextElementSibling
+                        .nextElementSibling.min = d.min
+            element.firstElementChild.nextElementSibling
+                        .nextElementSibling.max = d.max
+            element.firstElementChild.nextElementSibling
+                        .nextElementSibling.nextElementSibling
+                        .innerHTML = d.min + ' ... ' + d.max
+        }
+        rangeEditorDialog.hide()
+    })
+}
+</script>

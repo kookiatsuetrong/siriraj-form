@@ -1,0 +1,79 @@
+<div class="modal fade" id="edit-text-modal" data-backdrop="static" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Text</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="edit-text-modal-title"
+                    class="form-control"
+                    placeholder="Title" />
+                <input id="edit-text-modal-placeholder"
+                    class="form-control"
+                    placeholder="Placeholder" />
+                <input id="edit-text-modal-id" type="hidden" />
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn btn-danger"
+                    id="edit-text-modal-delete">Delete</button>
+                <button type="button" class="btn btn-primary"
+                    id="edit-text-modal-ok">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function editText(element) {
+    var title   = document.querySelector("#edit-text-modal-title")
+    title.focus()
+    title.value = element.firstElementChild.innerText
+
+    var input   = element.firstElementChild.nextElementSibling.nextElementSibling
+    document.querySelector("#edit-text-modal-placeholder").value = input.placeholder
+
+    var id      = document.querySelector("#edit-text-modal-id")
+    id.value = element.getAttribute("element-id")
+    textEditorDialog.show()
+}
+var textEditorDialog = new bootstrap.Modal(document.querySelector("#edit-text-modal"))
+var textEditorOk = document.querySelector("#edit-text-modal-ok")
+var textEditorDelete = document.querySelector("#edit-text-modal-delete")
+textEditorDelete.onclick = function(e) {
+    var id = document.querySelector("#edit-text-modal-id")
+    removeElement(id.value)
+    textEditorDialog.hide()
+}
+textEditorOk.onclick = function(e) {
+    var title       = document.querySelector("#edit-text-modal-title")
+    var placeholder = document.querySelector("#edit-text-modal-placeholder")
+    var id          = document.querySelector("#edit-text-modal-id")
+
+    fetch('/save-element/' + id.value, {
+        method:'put',
+        body: 'title=' + title.value + '&placeholder=' + placeholder.value,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+    }).then( r => r.json() )
+    .then( d => {
+        console.log(d)
+        var all = document.querySelectorAll("div.element")
+        var element = null
+        for (var i = 0; i < all.length; i++) {
+            if (d.id == all[i].getAttribute('element-id') ) {
+                element = all[i]
+            }
+        }
+        if (element != null) {
+            element.firstElementChild.innerText = d.title
+            element.firstElementChild.nextElementSibling
+                    .nextElementSibling.placeholder = d.placeholder
+        }
+        textEditorDialog.hide()
+    })
+}
+</script>
