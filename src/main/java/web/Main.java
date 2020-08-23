@@ -310,10 +310,10 @@ class Web
             try {
                 Element t = manager.find(Element.class, eid);
                 if (t.form.user.id == user.id) {
-                    e = t;
                     manager.getTransaction().begin();
                     manager.remove(t);
                     manager.getTransaction().commit();
+                    e = t;
                 }
             } catch (Exception x) { }
             manager.close();
@@ -370,14 +370,13 @@ class Web
             int form = Integer.valueOf(fid);
             for (Element e : all) {
                 Value v = new Value();
-                v.element = e;
+                v.element = e;                // TODO: Use only element.id, prevent foreign key
                 v.value   = e.value;
                 v.time    = time;
                 manager.persist(v);
             }
             manager.getTransaction().commit();
         } catch (Exception x) {
-            System.out.println(x);
         }
         manager.close();
         return all;

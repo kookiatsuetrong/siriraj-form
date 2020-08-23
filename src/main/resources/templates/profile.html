@@ -1,14 +1,16 @@
 <#include "header.html">
 <div class="container">
-    <h1>Welcome to your profile page</h1>
-    <h4>All of your forms</h4>
+    <h1>Your Forms</h1>
+    <ol>
     <#list forms as f>
-        ${f.title}
-        <a href="/form/${f.id}">View</a>
-        <a href="/edit/${f.id}">Edit</a>
-        <a href="/result/${f.id}">Result</a>
-        <br/>
+        <li>
+            ${f.title}
+            <a href="/form/${f.id}">View</a>
+            <a href="/edit/${f.id}">Edit</a>
+            <a href="/result/${f.id}">Result</a>
+        </li>
     </#list>
+    </ol>
 
     <br/>
     <div class="btn-group">
