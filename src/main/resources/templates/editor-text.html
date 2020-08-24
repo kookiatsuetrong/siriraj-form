@@ -12,7 +12,7 @@
                     class="form-control"
                     placeholder="Title" />
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="edit-text-modal-required">
+                    <input class="form-check-input" type="checkbox" id="edit-text-modal-required">
                     <label class="form-check-label" for="edit-text-modal-required">Required</label>
                 </div>
                 <input id="edit-text-modal-placeholder"
@@ -33,14 +33,21 @@
 <script>
 function editText(element) {
     var title   = document.querySelector("#edit-text-modal-title")
-    title.focus()
     title.value = element.firstElementChild.innerText
+    title.focus()
 
     var input   = element.firstElementChild.nextElementSibling.nextElementSibling
     document.querySelector("#edit-text-modal-placeholder").value = input.placeholder
 
     var id      = document.querySelector("#edit-text-modal-id")
-    id.value = element.getAttribute("element-id")
+    id.value    = element.getAttribute("element-id")
+
+    var required     = document.querySelector("#edit-text-modal-required")
+    required.checked = false
+    if (element.getAttribute("element-required") == "Y") {
+        required.checked = true
+    }
+
     textEditorDialog.show()
 }
 var textEditorDialog = new bootstrap.Modal(document.querySelector("#edit-text-modal"))
@@ -55,10 +62,15 @@ textEditorOk.onclick = function(e) {
     var title       = document.querySelector("#edit-text-modal-title")
     var placeholder = document.querySelector("#edit-text-modal-placeholder")
     var id          = document.querySelector("#edit-text-modal-id")
+    var required    = document.querySelector("#edit-text-modal-required")
+
+    var requiredValue = required.checked ? 'Y' : 'N'
 
     fetch('/save-element/' + id.value, {
         method:'put',
-        body: 'title=' + title.value + '&placeholder=' + placeholder.value,
+        body: 'title=' + title.value +
+              '&placeholder=' + placeholder.value +
+              '&required=' + requiredValue,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
@@ -73,6 +85,7 @@ textEditorOk.onclick = function(e) {
             }
         }
         if (element != null) {
+            element.setAttribute('element-required', requiredValue)
             element.firstElementChild.innerText = d.title
             element.firstElementChild.nextElementSibling
                     .nextElementSibling.placeholder = d.placeholder

@@ -1,50 +1,61 @@
 <#include "header.html">
 <div class="container">
+    <#if user??>
+        <a href="/profile" style="float:right;margin-top:.25rem;">Home</a>
+    </#if>
+    <h2 id='form-title'>${form.title}</h2>
+
     <form id="main-form">
-        <#if user??>
-            <a href="/profile" style="float:right;margin-top:.25rem;">Home</a>
-        </#if>
-        <h2>${form.title}</h2>
 
         <#list elements as e>
             <div class='element'
                  element-id="${e.id}"
                  element-type="${e.type}"
-                 element-detail="${e.placeholder ! ''}">
+                 element-detail="${e.placeholder ! ''}"
+                 element-required="${e.required}"
+                 element-custom="${e.custom}">
+
                 <label>${e.title}</label>
+                <a onclick='editElement(${e.id})' class='editor'>&nbsp;</a>
+
                 <#if e.type == "text">
-                    <input type="text"
-                           class="form-control"
-                           placeholder="${e.placeholder ! ''}"  />
+                <input type="text"
+                       class="form-control"
+                       placeholder="${e.placeholder ! ''}" />
                 </#if>
                 <#if e.type == "range">
-                    <input type="range"
-                           min="${e.min !  0}"
-                           max="${e.max ! 10}"
-                           class="form-range"
-                           oninput="updateRange(this)"
-                           onchange="updateRange(this)"/>
-                    <p class="input-value">${e.min ! 0} ... ${e.max ! 10}</p>
+                <input type="range"
+                       min="${e.min !  0}"
+                       max="${e.max ! 10}"
+                       class="form-range"
+                       oninput="updateRange(this)" />
+                <p class="input-value">${e.min ! 0} ... ${e.max ! 10}</p>
                 </#if>
                 <#if e.type == "radio">
-                    <div class="radio-choice">
-                        <#assign id=e.id                      />
-                        <#assign items=e.placeholder          />
-                        <#assign index=0                      />
-                        <#list items?split("\n") as item       >
-                        <div class="form-check">
-                            <input class="form-check-input"
-                                   type="radio"
-                                   name="${id}"
-                                   id="${id}-${index}"
-                                   value="${item}" />
-                            <label class="form-check-label"
-                                   for="${id}-${index}"
-                                    >${item}</label>
-                        </div>
-                        <#assign index=index+1                />
-                        </#list>
+                <div class="radio-choice">
+                    <#assign id=e.id                      />
+                    <#assign items=e.placeholder          />
+                    <#assign index=0                      />
+                    <#list items?split("\n") as item       >
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="radio"
+                               name="${id}"
+                               id="${id}-${index}"
+                               value="${item}" />
+                        <label class="form-check-label"
+                               for="${id}-${index}"
+                                >${item}</label>
                     </div>
+                    <#assign index=index+1                />
+                    </#list>
+
+                    <#if e.custom == "Y"                   >
+                    <input class='form-control'
+                           id='other-${id}'
+                           placeholder='...' />
+                    </#if                                  >
+                </div>
                 </#if>
             </div>
         </#list>

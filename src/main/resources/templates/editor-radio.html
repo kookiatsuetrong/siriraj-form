@@ -12,16 +12,16 @@
                     class="form-control"
                     placeholder="Title" />
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="edit-text-modal-required">
-                    <label class="form-check-label" for="edit-text-modal-required">Required</label>
+                    <input class="form-check-input" type="checkbox" id="edit-radio-modal-required">
+                    <label class="form-check-label" for="edit-radio-modal-required">Required</label>
                 </div>
                 <textarea class="form-control"
                     id="edit-radio-modal-detail"
                     rows="5"
                 ></textarea>
                 <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="edit-text-modal-custom">
-                    <label class="form-check-label" for="edit-text-modal-custom">Custom Last Item</label>
+                    <input class="form-check-input" type="checkbox" id="edit-radio-modal-custom">
+                    <label class="form-check-label" for="edit-radio-modal-custom">Custom Item</label>
                 </div>
                 <input id="edit-radio-modal-id" type="hidden" />
             </div>
@@ -38,12 +38,28 @@
 <script>
 function editRadio(element) {
     var title   = document.querySelector("#edit-radio-modal-title")
-    title.focus()
     title.value = element.firstElementChild.innerText
+    title.focus()
+
     var id      = document.querySelector("#edit-radio-modal-id")
     id.value    = element.getAttribute("element-id")
+
     var detail  = document.querySelector("#edit-radio-modal-detail")
     detail.value = element.getAttribute("element-detail")
+
+    var required     = document.querySelector("#edit-radio-modal-required")
+    required.checked = false
+    if (element.getAttribute("element-required") == "Y") {
+        required.checked = true
+    }
+
+    var custom     = document.querySelector("#edit-radio-modal-custom")
+    console.log(custom)
+    custom.checked = false
+    if (element.getAttribute("element-custom") == "Y") {
+        custom.checked = true
+    }
+
     radioEditorDialog.show()
 }
 var radioEditorDialog = new bootstrap.Modal(document.querySelector("#edit-radio-modal"))
@@ -55,13 +71,21 @@ radioEditorDelete.onclick = function(e) {
     radioEditorDialog.hide()
 }
 radioEditorOk.onclick = function(e) {
-    var title  = document.querySelector("#edit-radio-modal-title")
-    var detail = document.querySelector("#edit-radio-modal-detail")
-    var id     = document.querySelector("#edit-radio-modal-id")
+    var title    = document.querySelector("#edit-radio-modal-title")
+    var detail   = document.querySelector("#edit-radio-modal-detail")
+    var id       = document.querySelector("#edit-radio-modal-id")
+    var required = document.querySelector("#edit-radio-modal-required")
+    var custom   = document.querySelector("#edit-radio-modal-custom")
+
+    var requiredValue = required.checked ? 'Y' : 'N'
+    var customValue   = custom.checked ? 'Y' : 'N'
 
     fetch('/save-element/' + id.value, {
         method:'put',
-        body: 'title=' + title.value + '&placeholder=' + detail.value,
+        body: 'title='        + title.value   +
+              '&placeholder=' + detail.value  +
+              '&required='    + requiredValue +
+              '&custom='      + customValue,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
@@ -76,10 +100,12 @@ radioEditorOk.onclick = function(e) {
             }
         }
         if (element != null) {
+            element.setAttribute('element-required', requiredValue)
+            element.setAttribute('element-custom', customValue)
             element.firstElementChild.innerText = d.title
             element.setAttribute("element-detail", d.placeholder)
             var index = 0
-            var s = ''
+            var radio = ''
             for (var value of d.placeholder.split('\n')) {
                 var t = `
                         <div class="form-check">
@@ -92,18 +118,20 @@ radioEditorOk.onclick = function(e) {
                                    for="--id-----index--"
                                     >--value--</label>
                         </div>`
-                t = t.replace('--id--', d.id)
-                t = t.replace('--id--', d.id)
-                t = t.replace('--id--', d.id)
-                t = t.replace('--index--', index)
-                t = t.replace('--index--', index)
-                t = t.replace('--value--', value)
-                t = t.replace('--value--', value)
-                s += t
+                t = replace(t, '--index--', index)
+                t = replace(t, '--value--', value)
+                radio += t
                 index++
             }
+            radio = `<div class="radio-choice">` + radio
+            if (d.custom == 'Y') {
+                radio += `<input class='form-control' id='other---id--'
+                                 placeholder='...' />`
+            }
+            radio += `</div>`
+            radio = replace(radio, '--id--', d.id)
             element.firstElementChild.nextElementSibling
-                .nextElementSibling.innerHTML = s
+                .nextElementSibling.innerHTML = radio
         }
         radioEditorDialog.hide()
     })

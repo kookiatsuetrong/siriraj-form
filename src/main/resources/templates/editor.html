@@ -8,7 +8,10 @@
             <div class='element'
                  element-id="${e.id}"
                  element-type="${e.type}"
-                 element-detail="${e.placeholder ! ''}">
+                 element-detail="${e.placeholder ! ''}"
+                 element-required="${e.required}"
+                 <#if e.type=='radio'>element-custom="${e.custom}"</#if>
+                 >
 
                 <label>${e.title}</label>
                 <a onclick='editElement(${e.id})' class='editor'>&nbsp;</a>
@@ -44,6 +47,12 @@
                     </div>
                     <#assign index=index+1                />
                     </#list>
+
+                    <#if e.custom == "Y"                   >
+                    <input class='form-control'
+                           id='other-${id}'
+                           placeholder='...' />
+                    </#if                                  >
                 </div>
                 </#if>
             </div>
@@ -132,7 +141,7 @@ function addElement(title, type) {
             break
 
         case 'radio':
-            detail = 'Item A\nItem B\nItem C'
+            detail = 'Item A\nItem B\nItem C\nOther'
             placeholder = detail
             break;
 
@@ -178,13 +187,16 @@ function addElement(title, type) {
                                        for="--id-----index--"
                                        >--value--</label>
                             </div>`
-                    t = replace(t, '--id--', d.id)
                     t = replace(t, '--index--', index)
                     t = replace(t, '--value--', value)
                     radio += t
                     index++
                 }
-                radio = `<div class="radio-choice">` + radio + `</div>`
+                radio = `<div class="radio-choice">` +
+                        radio +
+                        `<input class='form-control' id='other---id--'
+                                placeholder='...' />` +
+                        `</div>`
                 template += radio
             }
             if (type == 'text' || type == 'range'){
@@ -203,6 +215,7 @@ function addElement(title, type) {
             template = replace(template, '--type--',       type)
             template = replace(template, '--class-name--', className)
             template = replace(template, '--element-id--', d.id)
+            template = replace(template, '--id--',         d.id)
 
             var form = document.querySelector("#main-form")
             form.innerHTML += template

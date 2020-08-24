@@ -16,12 +16,16 @@ public class Element {
     public String value;
     public String detail;
     public String status;
+    public char required;
+    public char custom;
 
-    public int getId()       { return id;    }
-    public String getTitle() { return title; }
-    public String getType()  { return type;  }
+    public int    getId()          { return id;    }
+    public String getTitle()       { return title; }
+    public String getType()        { return type;  }
     public String getPlaceholder() { return placeholder; }
-    public int getMin()      { return min; }
-    public int getMax()      { return max; }
-    public String getValue() { return value; }
+    public int    getMin()         { return min;      }
+    public int    getMax()         { return max;      }
+    public String getValue()       { return value;    }
+    public char   getRequired()    { return required; }
+    public char   getCustom()      { return custom;   }
 }

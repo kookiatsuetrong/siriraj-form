@@ -11,10 +11,6 @@
                 <input id="edit-range-modal-title"
                     class="form-control"
                     placeholder="Title" />
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" value="" id="edit-text-modal-required">
-                    <label class="form-check-label" for="edit-text-modal-required">Required</label>
-                </div>
                 <input id="edit-range-modal-min"
                     class="form-control"
                     placeholder="Minimum" />
@@ -47,6 +43,7 @@ function editRange(element) {
 
     var id      = document.querySelector("#edit-range-modal-id")
     id.value = element.getAttribute("element-id")
+
     rangeEditorDialog.show()
 }
 var rangeEditorDialog = new bootstrap.Modal(document.querySelector("#edit-range-modal"))
@@ -65,7 +62,9 @@ rangeEditorOk.onclick = function(e) {
 
     fetch('/save-element/' + id.value, {
         method:'put',
-        body: 'title=' + title.value + '&min=' + min.value + '&max=' + max.value,
+        body: 'title=' + title.value +
+              '&min='  + min.value +
+              '&max='  + max.value,
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },

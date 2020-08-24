@@ -285,6 +285,8 @@ class Web
                     e.form   = f;
                     e.status = "active";
                     e.placeholder = placeholder;
+                    e.required = 'N';
+                    e.custom   = 'Y';
                     e.min    = 0;
                     e.max    = 10;
                     if (min != null) { e.min = min; }
@@ -332,7 +334,9 @@ class Web
                         String title,
                         String placeholder,
                         Integer min,
-                        Integer max)
+                        Integer max,
+                        Character required,
+                        Character custom)
     {
         Element e = new Element();
         User user = (User)session.getAttribute("user");
@@ -347,6 +351,8 @@ class Web
                 if (t.form.user.id == user.id) {
                     t.title = title;
                     t.placeholder = placeholder;
+                    t.required = required == null ? 'N' : required;
+                    t.custom   = custom == null ? 'N' : custom;
                     if (min != null) { t.min = min; }
                     if (min != null) { t.max = max; }
                     manager.getTransaction().begin();
