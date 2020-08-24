@@ -21,13 +21,15 @@ create table elements(
     form_id     int not null,
     title       varchar(200) not null default '',
     type        varchar(200) not null,
+    required   char default 'N',
+    status      varchar(200) default 'active',
     placeholder varchar(200),
     min         int default  0,
     max         int default 10,
     value       int,
     step        int,
     detail      varchar(200),
-    status      varchar(200) default 'active'
+    specify     char default 'Y'
 );
 
 insert into users(email,password,full_name)
