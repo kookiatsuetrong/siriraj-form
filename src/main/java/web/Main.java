@@ -381,7 +381,7 @@ class Web
             int form = Integer.valueOf(fid);
             for (Element e : all) {
                 Value v = new Value();
-                v.element = e;                // TODO: Use only element.id, prevent foreign key
+                v.element = e;
                 v.value   = e.value;
                 v.time    = time;
                 manager.persist(v);
