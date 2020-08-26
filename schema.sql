@@ -3,6 +3,7 @@ create user siriraj identified with mysql_native_password by '@siriraj';
 grant all on form.* to siriraj;
 
 use form;
+
 create table users(
     id        int unique not null auto_increment,
     email     varchar(200) unique not null,
