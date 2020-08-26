@@ -17,6 +17,7 @@
             <property name=
                 "javax.persistence.schema-generation.database.action"
                 value="create" />
+
             <property name="hibernate.jdbc.time_zone"
                 value="UTC" />
         </properties>

@@ -1,4 +1,5 @@
 package web;
+
 import javax.persistence.*;
 
 @Entity @Table(name="users")

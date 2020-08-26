@@ -68,7 +68,8 @@ rangeEditorOk.onclick = function(e) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
-    }).then( r => r.json() )
+    })
+    .then( r => r.json() )
     .then( d => {
         var all = document.querySelectorAll("div.element")
         var element = null

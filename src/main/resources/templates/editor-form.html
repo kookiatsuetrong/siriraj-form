@@ -32,7 +32,8 @@ formEditorOk.onclick = function(e) {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         }
-    }).then( r => r.text() )
+    })
+    .then( r => r.text() )
     .then( d => {
         formTitle = title.value
         document.querySelector("#form-title").innerHTML = formTitle
