@@ -14,7 +14,6 @@ public class Element {
     public String placeholder;
     public int min;
     public int max;
-    public String value;
     public String status;
     public char required;
     public char custom;
