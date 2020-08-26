@@ -17,6 +17,8 @@ public class Element {
     public String status;
     public char required;
     public char custom;
+    public String value;
+    public String detail;
 
     public int    getId()          { return id;    }
     public String getTitle()       { return title; }
@@ -26,4 +28,6 @@ public class Element {
     public int    getMax()         { return max;      }
     public char   getRequired()    { return required; }
     public char   getCustom()      { return custom;   }
+    public String getValue()       { return value;    }
+    public String getDetail()      { return detail;   }
 }

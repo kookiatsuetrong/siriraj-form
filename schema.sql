@@ -29,7 +29,8 @@ create table elements(
     max         int default 10,
     step        int,
     detail      varchar(200),
-    custom      char default 'Y',
+    value       varchar(200),
+    custom      char default 'Y'
 );
 
 insert into users(email,password,full_name)
