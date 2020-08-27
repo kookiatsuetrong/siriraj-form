@@ -18,14 +18,14 @@
                 <input type="text"
                        class="form-control"
                        placeholder="${e.placeholder ! ''}" 
-					   id="target-${e.id}"/>
+                       id="target-${e.id}"/>
                 </#if>
                 <#if e.type == "range">
                 <input type="range"
                        min="${e.min !  0}"
                        max="${e.max ! 10}"
                        class="form-range"
-					   id="target-${e.id}"
+                       id="target-${e.id}"
                        oninput="updateRange(this)" />
                 <p class="input-value">${e.min ! 0} ... ${e.max ! 10}</p>
                 </#if>
@@ -128,7 +128,7 @@ function submit() {
         }
     }
     console.table(data)
-	if (ok) {
+    if (ok) {
         fetch('/save-data/' + formId, {
             method: 'post',
             headers: {
@@ -146,7 +146,7 @@ function submit() {
 <style>
 form {
     padding: 0.5rem 0;
-	max-width: 640px;
+    max-width: 640px;
 }
 .element {
     margin-bottom: 1rem;
