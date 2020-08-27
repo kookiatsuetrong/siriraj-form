@@ -1,8 +1,5 @@
 <#include "header.html">
 <div class="container">
-    <#if user??>
-        <a href="/profile" style="float:right; margin-top:.25rem;">Home</a>
-    </#if>
     <h2 id='form-title'>${form.title}</h2>
 
     <form id="main-form">
@@ -108,6 +105,7 @@ function submit() {
 <style>
 form {
     padding: 0.5rem 0;
+	max-width: 640px;
 }
 .element {
     margin-bottom: 1rem;
