@@ -13,7 +13,6 @@
                  element-custom="${e.custom}">
 
                 <label>${e.title}</label>
-                <a onclick='editElement(${e.id})' class='editor'>&nbsp;</a>
 
                 <#if e.type == "text">
                 <input type="text"
@@ -33,13 +32,16 @@
                     <#assign id=e.id                      />
                     <#assign items=e.placeholder          />
                     <#assign index=0                      />
-                    <#list items?split("\n") as item       >
+                    <#assign all = items?split("\n")      />
+                    <#list all as item                     >
                     <div class="form-check">
                         <input class="form-check-input"
                                type="radio"
                                name="${id}"
                                id="${id}-${index}"
-                               value="${item}" />
+                               value="${item}"
+                               index="${index}"
+                               last="${all[all?size - 1]}" />
                         <label class="form-check-label"
                                for="${id}-${index}"
                                 >${item}</label>
@@ -68,27 +70,39 @@ function updateRange(e) {
     e.nextElementSibling.innerText = e.value
 }
 function submit() {
-    var main = document.querySelector('#main-form')
+    var main = document.querySelector("#main-form")
     var data = [ ]
-    var all = document.querySelectorAll('.element')
+    var all = document.querySelectorAll(".element")
     for (var i in all) {
         if (all[i].getAttribute) {
             var id    = all[i].getAttribute("element-id")
-            var type  = all[i].getAttribute('element-type')
+            var type  = all[i].getAttribute("element-type")
             var label = all[i].firstElementChild
             if (label) {
-                if (type == 'text' || type == 'range') {
+                if (type == "text" || type == "range") {
                     var input = all[i].firstElementChild.nextElementSibling
                     data.push({id:id, value:input.value})
                 }
-                if (type == 'radio') {
+                if (type == "radio") {
                     var selector = 'input[name="' + id + '"]:checked'
-                    var value = document.querySelector(selector).value
+                    var selected = document.querySelector(selector)
+                    var value = ''
+                    if (selected) {
+                        value = selected.value
+                        var last = selected.getAttribute("last")
+                        var custom = all[i].getAttribute("element-custom")
+                        if (custom == 'Y' && value == last) {
+                            var other = document.querySelector("#other-" + id)
+                            value = other.value
+                        }
+                    }
                     data.push({id:id, value:value})
                 }
             }
         }
     }
+    // console.table(data)
+
     fetch('/save-data/' + formId, {
         method: 'post',
         headers: {
