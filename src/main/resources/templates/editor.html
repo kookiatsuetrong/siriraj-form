@@ -49,8 +49,9 @@
 
 				<#if e.custom == "Y"                   >
 				<input class='form-control'
-						id='other-${id}'
-						placeholder='...' />
+				       id='other-${id}'
+				       placeholder='...' 
+                       />
 				</#if                                  >
 			</div>
 			</#if>
@@ -63,6 +64,7 @@
     <a onclick="addElement('Options', 'radio')">Options</a>
     <a onclick="editForm()">Settings</a>
     <a href="/profile" style="float:right;">Home</a>
+    <a href="/form/${form.id}" style="float:right;margin-right: .25rem;">View</a> 
 </div>
 
 <script>

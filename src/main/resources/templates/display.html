@@ -12,18 +12,20 @@
                  element-required="${e.required}"
                  element-custom="${e.custom}">
 
-                <label>${e.title}</label>
+                <label id="label-${e.id}">${e.title}</label>
 
                 <#if e.type == "text">
                 <input type="text"
                        class="form-control"
-                       placeholder="${e.placeholder ! ''}" />
+                       placeholder="${e.placeholder ! ''}" 
+					   id="target-${e.id}"/>
                 </#if>
                 <#if e.type == "range">
                 <input type="range"
                        min="${e.min !  0}"
                        max="${e.max ! 10}"
                        class="form-range"
+					   id="target-${e.id}"
                        oninput="updateRange(this)" />
                 <p class="input-value">${e.min ! 0} ... ${e.max ! 10}</p>
                 </#if>
@@ -41,7 +43,8 @@
                                id="${id}-${index}"
                                value="${item}"
                                index="${index}"
-                               last="${all[all?size - 1]}" />
+                               last="${all[all?size - 1]}" 
+                               onclick="updateRadio(${id})" />
                         <label class="form-check-label"
                                for="${id}-${index}"
                                 >${item}</label>
@@ -52,7 +55,8 @@
                     <#if e.custom == "Y"                   >
                     <input class='form-control'
                            id='other-${id}'
-                           placeholder='...' />
+                           placeholder='...' 
+                           readonly />
                     </#if                                  >
                 </div>
                 </#if>
@@ -69,24 +73,41 @@ function updateRange(e) {
     e.setAttribute('value', e.value)
     e.nextElementSibling.innerText = e.value
 }
+function updateRadio(id) {
+    var selector = 'input[name="' + id + '"]:checked'
+    var selected = document.querySelector(selector)
+    var other    = document.querySelector('#other-' + id)
+    if (selected && other) {
+        var value = selected.value
+        var last = selected.getAttribute("last")
+        if (last == value) {
+            other.removeAttribute('readonly')
+            other.focus()
+        } else {   
+            other.setAttribute('readonly','true')
+        }
+    }
+}
 function submit() {
     var main = document.querySelector("#main-form")
     var data = [ ]
-    var all = document.querySelectorAll(".element")
+    var all  = document.querySelectorAll(".element")
+    var ok   = true
     for (var i in all) {
         if (all[i].getAttribute) {
-            var id    = all[i].getAttribute("element-id")
-            var type  = all[i].getAttribute("element-type")
-            var label = all[i].firstElementChild
+            var id       = all[i].getAttribute("element-id")
+            var type     = all[i].getAttribute("element-type")
+            var required = all[i].getAttribute("element-required")
+            var label    = document.querySelector("#label-" + id)
             if (label) {
+                var value = ''
                 if (type == "text" || type == "range") {
-                    var input = all[i].firstElementChild.nextElementSibling
-                    data.push({id:id, value:input.value})
+                    var input = document.querySelector("#target-" + id)
+                    value = input.value
                 }
                 if (type == "radio") {
                     var selector = 'input[name="' + id + '"]:checked'
                     var selected = document.querySelector(selector)
-                    var value = ''
                     if (selected) {
                         value = selected.value
                         var last = selected.getAttribute("last")
@@ -96,23 +117,29 @@ function submit() {
                             value = other.value
                         }
                     }
-                    data.push({id:id, value:value})
+                }
+                if (value == '' && required == 'Y') {
+                    ok = false
+                    console.log('Not Ready')
+                } else {
+                    data.push({id:id, value:input.value})
                 }
             }
         }
     }
-    // console.table(data)
-
-    fetch('/save-data/' + formId, {
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({data:data})
-    }).then( r => r.json() )
-    .then(d => {
-        location.reload()
-    })
+    console.table(data)
+	if (ok) {
+        fetch('/save-data/' + formId, {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({data:data})
+        }).then( r => r.json() )
+        .then(d => {
+            location.reload()
+        })
+    }
 }
 </script>
 
