@@ -83,7 +83,7 @@ function updateRadio(id) {
         if (last == value) {
             other.removeAttribute('readonly')
             other.focus()
-        } else {   
+        } else {
             other.setAttribute('readonly','true')
         }
     }
@@ -122,7 +122,7 @@ function submit() {
                     ok = false
                     console.log('Not Ready')
                 } else {
-                    data.push({id:id, value:input.value})
+                    data.push({id:id, value:value})
                 }
             }
         }
